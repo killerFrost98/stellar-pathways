@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 interface PlanetConfig {
   name: string;
@@ -30,10 +30,16 @@ export class SolarSystemComponent implements AfterViewInit {
     orbit: THREE.EllipseCurve,
     time: number
   }> = new Map();
+  private rocket: THREE.Mesh | null = null;
+  private rocketTrajectory: THREE.EllipseCurve | null = null;
+  private rocketProgress: number = 0;
+  isRocketLaunched: boolean = false;
 
   // Standard sizes
   private readonly STANDARD_PLANET_SIZE = 0.02;
   private readonly SUN_SIZE = this.STANDARD_PLANET_SIZE * 2;
+  private readonly ROCKET_SIZE = this.STANDARD_PLANET_SIZE * 0.5;
+  private readonly ROCKET_SPEED = 0.0005; // Adjust for faster/slower rocket movement
 
   // Actual scaled values (in AU and Earth days)
   private readonly PLANET_CONFIGS: PlanetConfig[] = [
@@ -139,7 +145,7 @@ export class SolarSystemComponent implements AfterViewInit {
     const neptuneSemiMajorAxis = this.PLANET_CONFIGS[7].semiMajorAxis * this.SCALE_FACTOR;
     const cameraDistance = neptuneSemiMajorAxis * 1.5; // Factor to ensure full visibility
     const cameraHeight = neptuneSemiMajorAxis * 1.2; // Slight angle for better perspective
-    
+
     this.camera = new THREE.PerspectiveCamera(
       45, window.innerWidth / window.innerHeight, 0.1, 1000
     );
@@ -254,6 +260,101 @@ export class SolarSystemComponent implements AfterViewInit {
     this.scene.add(ambientLight);
   }
 
+  private createRocket() {
+    // Create rocket mesh
+    const rocketGeometry = new THREE.ConeGeometry(
+      this.ROCKET_SIZE,
+      this.ROCKET_SIZE * 4,
+      8
+    );
+    const rocketMaterial = new THREE.MeshStandardMaterial({
+      color: 0xCCCCCC,
+      roughness: 0.3,
+      metalness: 0.7
+    });
+    this.rocket = new THREE.Mesh(rocketGeometry, rocketMaterial);
+    this.rocket.rotation.x = Math.PI / 2; // Point the rocket along its trajectory
+  }
+
+  private calculateHohmannTransfer() {
+    const earthConfig = this.PLANET_CONFIGS.find(p => p.name === 'Earth')!;
+    const marsConfig = this.PLANET_CONFIGS.find(p => p.name === 'Mars')!;
+
+    // Calculate transfer orbit parameters
+    const r1 = earthConfig.semiMajorAxis * this.SCALE_FACTOR;
+    const r2 = marsConfig.semiMajorAxis * this.SCALE_FACTOR;
+    const a = (r1 + r2) / 2; // Semi-major axis of transfer orbit
+    const e = (r2 - r1) / (r2 + r1); // Eccentricity of transfer orbit
+
+    // Create transfer orbit
+    const b = a * Math.sqrt(1 - e * e); // Semi-minor axis
+    this.rocketTrajectory = new THREE.EllipseCurve(
+      0, 0,
+      a, b,
+      0, Math.PI, // Only need half the ellipse for the transfer
+      false,
+      0
+    );
+
+    // Visualize transfer orbit
+    const points = this.rocketTrajectory.getPoints(100);
+    const trajectoryGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    const trajectoryMaterial = new THREE.LineBasicMaterial({
+      color: 0x00ff00,
+      transparent: true,
+      opacity: 0.3
+    });
+    const trajectoryLine = new THREE.Line(trajectoryGeometry, trajectoryMaterial);
+    trajectoryLine.rotateX(Math.PI / 2);
+    this.scene.add(trajectoryLine);
+  }
+
+  launchRocket() {
+    if (this.isRocketLaunched || !this.planets.get('Earth')) return;
+
+    this.isRocketLaunched = true;
+    this.createRocket();
+    this.calculateHohmannTransfer();
+
+    if (this.rocket) {
+      this.scene.add(this.rocket);
+      this.rocketProgress = 0;
+    }
+  }
+
+  private updateRocket() {
+    if (!this.rocket || !this.rocketTrajectory || !this.isRocketLaunched) return;
+
+    this.rocketProgress += this.ROCKET_SPEED;
+
+    if (this.rocketProgress >= 1) {
+      // Rocket reached Mars, remove it from the scene
+      this.scene.remove(this.rocket);
+      this.rocket = null;
+      return;
+    }
+
+    // Calculate rocket position along trajectory
+    const position = this.rocketTrajectory.getPoint(this.rocketProgress);
+    this.rocket.position.set(position.x, 0, position.y);
+
+    // Calculate direction for rocket to point along trajectory
+    if (this.rocketProgress < 1) {
+      const nextPosition = this.rocketTrajectory.getPoint(
+        Math.min(this.rocketProgress + 0.01, 1)
+      );
+      const direction = new THREE.Vector3(
+        nextPosition.x - position.x,
+        0,
+        nextPosition.y - position.y
+      ).normalize();
+
+      // Update rocket rotation to point along trajectory
+      const angle = Math.atan2(direction.z, direction.x);
+      this.rocket.rotation.y = angle - Math.PI / 2;
+    }
+  }
+
   private animate() {
     requestAnimationFrame(() => this.animate());
 
@@ -269,6 +370,8 @@ export class SolarSystemComponent implements AfterViewInit {
         position.y // Using y component for z in 3D space
       );
     });
+
+    this.updateRocket();
 
     // Rotate sun
     this.sun.rotation.y += 0.001;
