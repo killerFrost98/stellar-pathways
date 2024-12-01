@@ -1,4 +1,9 @@
+<div class="controls">
+    <button (click)="toggleSimulation()" class="control-button">
+        {{ isRunning ? 'Pause' : 'Resume' }} Simulation
+    </button>
+    <button (click)="launchRocket()" class="control-button" [disabled]="isRocketLaunched">
+        Launch Rocket
+    </button>
+</div>
 <canvas #rendererCanvas></canvas>
-<button (click)="launchRocket()" class="launch-button" [disabled]="isRocketLaunched">
-    Launch to Mars
-</button>
