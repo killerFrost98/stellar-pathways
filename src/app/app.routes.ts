@@ -8,11 +8,15 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'solar-system',
+    redirectTo: 'noether-theorem',
     pathMatch: 'full'
   },
   {
+    path: 'noether-theorem',
+    loadComponent: () => import('./blog/noether-theorem/noether-theorem.component').then(m => m.NoetherTheoremComponent)
+  },
+  {
     path: '**',
-    redirectTo: 'solar-system'
+    redirectTo: 'noether-theorem'
   }
 ];

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noether's Theorem Explained with Three.js</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #444;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .canvas-container {
+            width: 500px;
+            height: 300px;
+        }
+
+        p {
+            max-width: 700px;
+            margin: 10px auto;
+            text-align: justify;
+        }
+
+        .key-concept {
+            font-weight: bold;
+            color: #007BFF;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Noether's Theorem: Symmetry and Conservation</h1>
+        <p>
+            Noether's Theorem, a cornerstone of theoretical physics, reveals a profound connection between <span
+                class="key-concept">symmetries</span> in a physical system and its <span
+                class="key-concept">conservation laws</span>. Simply put, if a system behaves the same way even when you
+            change something about it (a symmetry), then there's a physical quantity that stays constant over time (a
+            conservation law).
+        </p>
+
+        <div class="section">
+            <h2>Translation Symmetry and Conservation of Momentum</h2>
+            <p>
+                Imagine a ball moving in empty space. If the laws of physics are the same everywhere in space, meaning
+                the system is invariant under spatial <span class="key-concept">translation</span> (moving it around),
+                then the <span class="key-concept">total momentum</span> of the system is conserved.
+            </p>
+            <div class="canvas-container" id="momentumCanvas"></div>
+        </div>
+
+        <div class="section">
+            <h2>Rotational Symmetry and Conservation of Angular Momentum</h2>
+            <p>
+                Now consider a spinning top. If the laws of physics are the same regardless of the orientation of our
+                coordinate system, meaning the system is invariant under <span class="key-concept">rotation</span>, then
+                the <span class="key-concept">total angular momentum</span> of the system is conserved.
+            </p>
+            <div class="canvas-container" id="angularMomentumCanvas"></div>
+        </div>
+
+        <div class="section">
+            <h2>Time Translation Symmetry and Conservation of Energy</h2>
+            <p>
+                Finally, think about a pendulum swinging. If the laws of physics are the same today as they were
+                yesterday (or will be tomorrow), meaning the system is invariant under <span class="key-concept">time
+                    translation</span> (shifting the starting time), then the <span class="key-concept">total
+                    energy</span> of the system is conserved.
+            </p>
+            <div class="canvas-container" id="energyCanvas"></div>
+        </div>
+
+        <p>
+            These are just a few examples. Noether's Theorem is a powerful and general result that applies to a wide
+            range of physical systems. It provides a deep insight into the fundamental laws of nature and is a crucial
+            tool in theoretical physics.
+        </p>
+    </div>
+
+    <script>
+        // Function to create a basic Three.js scene
+        function createScene(containerId) {
+            const container = document.getElementById(containerId);
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // an animation loop is required when damping or auto-rotation are enabled
+            controls.dampingFactor = 0.05;
+
+            const animate = function () {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            };
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            });
+
+            return { scene, camera, renderer, animate, controls };
+        }
+
+        // Momentum Animation (Translation Symmetry)
+        function setupMomentumAnimation() {
+            const { scene, camera, renderer, animate, controls } = createScene('momentumCanvas');
+            camera.position.z = 5;
+            controls.target.set(0, 0, 0);
+
+            const geometry = new THREE.SphereGeometry(1, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            const speed = 0.01;
+            function render() {
+                console.log("Rendering momentum animation");
+                sphere.position.x += speed;
+                if (sphere.position.x > 3) {
+                    sphere.position.x = -3;
+                }
+                renderer.render(scene, camera);
+            }
+
+            animate();
+            renderer.setAnimationLoop(render);
+        }
+
+        // Angular Momentum Animation (Rotational Symmetry)
+        function setupAngularMomentumAnimation() {
+            const { scene, camera, renderer, animate, controls } = createScene('angularMomentumCanvas');
+            camera.position.set(0, 2, 5);
+            controls.target.set(0, 0, 0);
+
+            const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+            const material = new THREE.MeshNormalMaterial();
+            const torus = new THREE.Mesh(geometry, material);
+            scene.add(torus);
+
+            function render() {
+                console.log("Rendering momentum animation");
+                torus.rotation.x += 0.01;
+                torus.rotation.y += 0.02;
+                renderer.render(scene, camera);
+            }
+
+            animate();
+            renderer.setAnimationLoop(render);
+        }
+
+        // Energy Animation (Time Translation Symmetry)
+        function setupEnergyAnimation() {
+            const { scene, camera, renderer, animate, controls } = createScene('energyCanvas');
+            camera.position.set(0, 2, 5);
+            controls.target.set(0, 0, 0);
+
+            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const ball = new THREE.Mesh(geometry, material);
+            scene.add(ball);
+
+            const pivotPoint = new THREE.Vector3(0, 1, 0);
+            const rodGeometry = new THREE.CylinderGeometry(0.05, 0.05, 2, 32);
+            const rodMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
+            const rod = new THREE.Mesh(rodGeometry, rodMaterial);
+            rod.position.set(pivotPoint.x, pivotPoint.y - 1, pivotPoint.z);
+            rod.geometry.translate(0, 1, 0); // Move the cylinder's pivot to the top
+            ball.position.y = pivotPoint.y - 2;
+            scene.add(rod);
+            ball.add(rod); // Make the rod rotate with the ball
+
+            let angle = Math.PI / 4; // Initial angle
+            const amplitude = 1;
+            const frequency = 0.02;
+
+            function render() {
+                console.log("Rendering momentum animation");
+                angle = amplitude * Math.sin(Date.now() * frequency);
+                ball.position.x = pivotPoint.x + Math.sin(angle) * 1;
+                ball.position.y = pivotPoint.y - Math.cos(angle) * 1;
+                ball.rotation.z = angle;
+                renderer.render(scene, camera);
+            }
+
+            animate();
+            renderer.setAnimationLoop(render);
+        }
+
+        // Initialize animations
+        setupMomentumAnimation();
+        setupAngularMomentumAnimation();
+        setupEnergyAnimation();
+    </script>
+</body>
+
+</html>
