@@ -105,7 +105,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   private o9!: DynOrbits;
   private o10!: DynOrbits;
   private stars!: StarPoints;
-  private rotCorrection = 1; // earth may now be flipped :|
+  private rotCorrection = 1;
+  private selectedPlanet: any = null;
 
   constructor(private http: HttpClient) { }
 
@@ -353,35 +354,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     );
     this.scene.add(pluto);
     this.planetMeshes['pluto'].mesh = pluto;
-
-
-    // MORE PLANET DATA & RK4
-    // ==================================================================================
-    const tau = 2 * Math.PI;
-    const mercurySideral = tau / (1407.6 * 60 * 60);
-    const venusSideral = tau / (-5832.5 * 60 * 60);
-    const earthSideral = tau / (23.9 * 60 * 60);
-    const moonSideral = tau / (655.7 * 60 * 60);
-    const marsSideral = tau / (24.6 * 60 * 60);
-    const jupiterSideral = tau / (9.9 * 60 * 60);
-    const saturnSideral = tau / (10.7 * 60 * 60);
-    const uranusSideral = tau / (-17.2 * 60 * 60);
-    const neptuneSideral = tau / (16.1 * 60 * 60);
-    const plutoSideral = tau / (153.3 * 60 * 60);
-
-    // const masses = [
-    //     1.989e30,  // Sun
-    //     3.301e23,  // Mercury
-    //     4.867e24,  // Venus
-    //     5.972e24,  // Earth
-    //     7.342e22,  // Moon
-    //     6.417e23,  // Mars
-    //     1.898e27,  // Jupiter
-    //     5.683e26,  // Saturn
-    //     8.681e25,  // Uranus
-    //     1.024e26,  // Neptune
-    //     1.309e22  // Pluto
-    // ];
 
     this.bodies = []
     this.bodies.push({
@@ -640,8 +612,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   }
 
 
-  // ANIMATE
-  // ==================================================================================
   private animate(): void {
 
     const animDt = this.clock.getDelta();
@@ -671,8 +641,10 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     earth.updateAllRotations();
     earth.setSunOrigin();
 
-    this.controls.target.copy(this.target);
-    this.controls.update();
+    if (this.selectedPlanet) {
+      this.controls.target.copy(this.target);
+      this.controls.update();
+    }
     this.stats.update();
 
     requestAnimationFrame(() => this.animate());
@@ -684,6 +656,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
   onPlanetSelect(event: any): void {
     const key = event.target.value.toLowerCase();
+    this.selectedPlanet = key;
     this.target = this.planetMeshes[key].mesh.position;
     this.currentFact = this.getRandomFact(key);
   }
