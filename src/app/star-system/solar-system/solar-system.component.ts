@@ -734,7 +734,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   private addCSSLabels() {
     this.createLabelCSS("Mercury", this.planetMeshes['mercury'].mesh);
     this.createLabelCSS("Venus", this.planetMeshes['venus'].mesh);
-    this.createLabelCSS("Moon", this.planetMeshes['moon'].mesh);
+    // this.createLabelCSS("Moon", this.planetMeshes['moon'].mesh);
     this.createLabelCSS("Mars", this.planetMeshes['mars'].mesh);
     this.createLabelCSS("Jupiter", this.planetMeshes['jupiter'].mesh);
     this.createLabelCSS("Saturn", this.planetMeshes['saturn'].mesh);
@@ -744,7 +744,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const earthDiv = document.createElement('div');
     earthDiv.className = 'markerLabel';
-    earthDiv.textContent = "Earf";
+    earthDiv.textContent = "Earth";
+    earthDiv.style.color = 'white';
     const earthLabel = new CSS2DObject(earthDiv);
     const earth = this.planetMeshes['earth'].mesh as Earth3d;
     earthLabel.position.set(this.EARHRADIUS * 1.25, this.EARHRADIUS * 1.25, 0);
@@ -755,7 +756,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       const key = "earth";
       this.target = this.planetMeshes[key].mesh.position;
       this.currentFact = this.getRandomFact(key);
-
     })
   }
 
@@ -764,6 +764,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     const Div = document.createElement('div');
     Div.className = 'markerLabel';
     Div.textContent = name;
+    Div.style.color = 'white';
     const Label = new CSS2DObject(Div);
     Label.position.set(mesh.r * 1.25, mesh.r * 1.25, 0);
     Label.center.set(0, 1);
