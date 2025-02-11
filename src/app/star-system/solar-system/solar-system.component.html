@@ -1,21 +1,23 @@
 <canvas #rendererCanvas></canvas>
 <div class="top-right">
-    <select id="planetSelect" (change)="onPlanetSelect($event)">
-        <option value="" disabled selected>Select a planet</option>
-        <option value="Mercury">Mercury</option>
-        <option value="Venus">Venus</option>
-        <option value="Earth">Earth</option>
-        <option value="Moon">Moon</option>
-        <option value="Mars">Mars</option>
-        <option value="Jupiter">Jupiter</option>
-        <option value="Saturn">Saturn</option>
-        <option value="Uranus">Uranus</option>
-        <option value="Neptune">Neptune</option>
-        <option value="Pluto">Pluto</option>
-    </select>
+  <select id="planetSelect" (change)="onPlanetSelect($event)">
+    <option value="" disabled selected>Select a planet</option>
+    <option value="Mercury">Mercury</option>
+    <option value="Venus">Venus</option>
+    <option value="Earth">Earth</option>
+    <option value="Moon">Moon</option>
+    <option value="Mars">Mars</option>
+    <option value="Jupiter">Jupiter</option>
+    <option value="Saturn">Saturn</option>
+    <option value="Uranus">Uranus</option>
+    <option value="Neptune">Neptune</option>
+    <option value="Pluto">Pluto</option>
+    <option value="Rocket">Rocket</option>
+  </select>
 </div>
 <div class="bottom-middle">
-    <span id="cam-distance">{{ camDistance | number:'1.0-0' }}</span> [km]
-    time: <span id="utctime">{{ utcTime | number:'1.0-0' }}</span><br>
-    <span id="text-facts" style="font-size: 14px;">{{ currentFact }}</span>
+  <span id="cam-distance">{{ camDistance | number:'1.0-0' }}</span> [km] time:
+  <span id="utctime">{{ utcTime | number:'1.0-0' }}</span>
+  <br>
+  <span id="text-facts" style="font-size: 14px;">{{ currentFact }}</span>
 </div>

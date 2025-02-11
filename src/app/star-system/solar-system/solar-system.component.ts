@@ -16,6 +16,7 @@ import {
   RingGeometry,
   SRGBColorSpace,
   Scene,
+  SphereGeometry,
   Sprite, SpriteMaterial,
   TextureLoader,
   Vector3,
@@ -107,6 +108,10 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   private stars!: StarPoints;
   private rotCorrection = 1;
   private selectedPlanet: any = null;
+  public earthMarsAngle: any = 0;
+  public earthMarsLaunchWindowAngle: any = 0;
+  public rocketLaunched: boolean = false;
+  public rocketArrived: boolean = false;
 
   constructor(private http: HttpClient) { }
 
@@ -136,7 +141,9 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     // BASIC SETUP
     // ==================================================================================
     this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, .0001, 3000);
-    this.camera.position.set(.5, .2, 4);
+    this.camera.position.set(0, 100, 0);
+    this.camera.lookAt(0, 0, 0);
+
     this.scene = new Scene();
     this.scene.background = new Color(0x141414);
     this.renderer = new WebGLRenderer({ antialias: true, canvas: this.canvas.nativeElement });
@@ -154,6 +161,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.labelRenderer.domElement.style.top = '0px';
     document.body.appendChild(this.labelRenderer.domElement);
     this.controls = new OrbitControls(this.camera, this.labelRenderer.domElement);
+    this.controls.target.set(0, 0, 0);
     this.controls.update();
 
     // SUN
@@ -183,7 +191,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       'saturn': { 'mesh': null },
       'uranus': { 'mesh': null },
       'neptune': { 'mesh': null },
-      'pluto': { 'mesh': null }
+      'pluto': { 'mesh': null },
+      'rocket': { 'mesh': null }
     }
 
     const mercury = new Planet(2439.7 / sp, 0xada8a5, this.camera, this.scene);
@@ -423,11 +432,41 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       // pluto
     })
 
+    // 1) Create a minimal rocket Planet
+    const rocketPlanet = new Planet(
+      500 / sp,          // A small radius for the rocket, but big enough to see
+      0xffffff,          // Rocket color
+      this.camera,
+      this.scene
+    );
 
-    this.target = earth.position;
-    this.camera.position.copy(earth.position);
-    this.camera.position.normalize().multiplyScalar(.05).add(earth.position);
-    this.camera.position.y += .001;
+    // 2) Use either initWithRing or initWithoutRing. 
+    //    Pass a placeholder texture if desired. 
+    //    The 4th argument is the 6-element state [x, y, z, vx, vy, vz]; 
+    //    initially zero if rocket has not launched.
+    rocketPlanet.init(
+      "/assets/solar-system/images/2k_pluto.jpeg",
+      "/assets/solar-system/images/2k_pluto_dark.png",
+      [0, 0, 0, 0, 0, 0],           // position & velocity will be set at launch
+      0,                            // tilt
+      ringSprite                    // to get the ring circle
+    );
+
+    // 3) Initially hide it (not launched). Or place it at Earth.
+    rocketPlanet.visible = false;  // Turn visible once launched
+
+    // 4) Add to the scene and store in planetMeshes
+    this.scene.add(rocketPlanet);
+    this.planetMeshes['rocket'].mesh = rocketPlanet;
+
+    // 5) Give it a CSS label so you see "Rocket" text
+    this.createLabelCSS("Rocket", rocketPlanet);
+
+
+    // this.target = earth.position;
+    // this.camera.position.copy(earth.position);
+    // this.camera.position.normalize().multiplyScalar(.05).add(earth.position);
+    // this.camera.position.y += .001;
 
 
     // STARS
@@ -607,8 +646,84 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.o10.setLine(this.plutoOrbit);
     this.scene.add(this.o10);
 
+    this.earthMarsLaunchWindowAngle = this.predictLaunchWindow(365.25, 687);
     this.animate();
     this.addCSSLabels();
+  }
+
+  private launchHohmannTransfer(): void {
+    // 1) Safety check – skip if rocket already exists in the integrator
+    if (this.bodies.find(b => b.label === "rocket")) return;
+
+    // Index references: 0 = Sun, 3 = Earth, 5 = Mars
+    const sunBody = this.bodies[0];
+    const earthBody = this.bodies[3];
+    const marsBody = this.bodies[5];
+
+    // -------------------------
+    // 1) Compute Earth–Sun distance
+    // -------------------------
+    const rxE = earthBody.x - sunBody.x;
+    const ryE = earthBody.y - sunBody.y;
+    const rzE = earthBody.z - sunBody.z;
+    const rEarth = Math.sqrt(rxE * rxE + ryE * ryE + rzE * rzE);
+
+    // -------------------------
+    // 2) Compute Mars–Sun distance
+    // -------------------------
+    const rxM = marsBody.x - sunBody.x;
+    const ryM = marsBody.y - sunBody.y;
+    const rzM = marsBody.z - sunBody.z;
+    const rMars = Math.sqrt(rxM * rxM + ryM * ryM + rzM * rzM);
+
+    // -------------------------
+    // 3) Earth’s orbital velocity (relative to Sun)
+    // -------------------------
+    const vxE = earthBody.vx - sunBody.vx;
+    const vyE = earthBody.vy - sunBody.vy;
+    const vzE = earthBody.vz - sunBody.vz;
+    const vEarthMag = Math.sqrt(vxE * vxE + vyE * vyE + vzE * vzE);
+
+    // -------------------------
+    // 4) Hohmann Transfer velocity at Earth’s orbit
+    //    Approx formula: vTransfer = vEarthMag * sqrt(2*rMars / (rEarth + rMars))
+    // -------------------------
+    const ratio = Math.sqrt((2 * rMars) / (rEarth + rMars));
+    const vTransfer = ratio * vEarthMag; // approximate elliptical velocity
+
+    // The delta-v needed:
+    const deltaV = vTransfer - vEarthMag;
+
+    // -------------------------
+    // 5) Direction of Earth’s orbital motion
+    //    (the unit vector in Earth’s velocity direction)
+    // -------------------------
+    const earthVelDir = new Vector3(vxE, vyE, vzE).normalize();
+
+    // Multiply by deltaV:
+    const dvx = deltaV * earthVelDir.x;
+    const dvy = deltaV * earthVelDir.y;
+    const dvz = deltaV * earthVelDir.z;
+
+    // -------------------------
+    // 6) Create rocket in integrator array
+    // -------------------------
+    this.bodies.push({
+      label: "rocket",
+      mass: 1e-9, // negligible mass, so it doesn’t affect other bodies
+      x: earthBody.x,
+      y: earthBody.y,
+      z: earthBody.z,
+      vx: earthBody.vx + dvx,
+      vy: earthBody.vy + dvy,
+      vz: earthBody.vz + dvz
+    });
+
+    // Make rocket planet visible
+    this.planetMeshes['rocket'].mesh.visible = true;
+    this.rocketLaunched = true;
+
+    console.log("Rocket Launched!");
   }
 
 
@@ -621,8 +736,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.spaceTime += dt;
     this.utcTime = Math.floor(this.spaceTime);
 
-    const cam2target = new Vector3().copy(this.camera.position);
-    this.camDistance = cam2target.distanceTo(this.target) * 1e5 * 1e2;
+    // const cam2target = new Vector3().copy(this.camera.position);
+    // this.camDistance = cam2target.distanceTo(this.target) * 1e5 * 1e2;
 
     rungeKutta4(this.bodies, dt);
     this.planetMeshes['mercury'].mesh.updateFromRK4(this.bodies[1], dt * (2 * Math.PI / (1407.6 * 60 * 60)));
@@ -634,7 +749,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.planetMeshes['uranus'].mesh.updateFromRK4(this.bodies[8], dt * (2 * Math.PI / (-17.2 * 60 * 60)));
     this.planetMeshes['neptune'].mesh.updateFromRK4(this.bodies[9], dt * (2 * Math.PI / (16.1 * 60 * 60)));
     this.planetMeshes['pluto'].mesh.updateFromRK4(this.bodies[10], dt * (2 * Math.PI / (153.3 * 60 * 60)));
-
     const earth = this.planetMeshes['earth'].mesh as Earth3d;
     earth.setPosition(this.bodies[3].x, this.bodies[3].y, this.bodies[3].z);
     earth.rotation.y += -dt * (2 * Math.PI / (23.9 * 60 * 60)) * (this.rotCorrection || 1);
@@ -646,6 +760,46 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       this.controls.update();
     }
     this.stats.update();
+
+    this.earthMarsAngle = this.calculatePhaseAngle(this.planetMeshes['earth'].mesh.position, this.planetMeshes['mars'].mesh.position);
+
+    //   4a) Before rocket is launched, check the Earth–Mars angle and see if it’s near the window:
+    if (!this.rocketLaunched && !this.rocketArrived) {
+      // First compute the Earth–Mars phase angle
+      const earthPos = earth.position;  // from Earth mesh
+      const marsPos = this.planetMeshes['mars'].mesh.position;
+      this.earthMarsAngle = this.calculatePhaseAngle(earthPos, marsPos);
+
+      // Compare to your predicted ideal angle
+      const angleError = Math.abs(
+        (this.earthMarsAngle - this.earthMarsLaunchWindowAngle) / this.earthMarsLaunchWindowAngle
+      );
+      if (angleError < 0.01) {
+        // If you want to auto-launch when we’re within 1% of the ideal angle:
+        this.launchHohmannTransfer();
+      }
+    }
+
+    //   4b) If rocket is launched, find it and update
+    const rocketIndex = this.bodies.findIndex(b => b.label === "rocket");
+    if (rocketIndex !== -1 && this.rocketLaunched && !this.rocketArrived) {
+      const rocketBody = this.bodies[rocketIndex];
+      // Update rocket position/rotation (spin factor = 0 for a spacecraft)
+      this.planetMeshes['rocket'].mesh.updateFromRK4(rocketBody, dt * 0);
+
+      // Check distance to Mars to see if we’ve arrived
+      const marsBody = this.bodies[5];
+      const dx = rocketBody.x - marsBody.x;
+      const dy = rocketBody.y - marsBody.y;
+      const dz = rocketBody.z - marsBody.z;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+      // Adjust threshold for “Mars arrival” as you like
+      if (dist < 0.0005) {
+        this.rocketArrived = true;
+        console.log("Rocket has arrived at Mars!");
+      }
+    }
 
     requestAnimationFrame(() => this.animate());
     this.renderer.render(this.scene, this.camera);
@@ -727,6 +881,36 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     if (!facts) { return `No facts available for the planet "${planetName}".`; }
     const randomIndex = Math.floor(Math.random() * facts.length);
     return facts[randomIndex];
+  }
+
+  calculatePhaseAngle(earthPosition: Vector3, marsPosition: Vector3): number {
+    const crossProductZ = (earthPosition.x * marsPosition.y) - (earthPosition.y * marsPosition.x);
+
+    // Calculate the dot product of the Earth and Mars position vectors
+    const dotProduct = (earthPosition.x * marsPosition.x) + (earthPosition.y * marsPosition.y) + (earthPosition.z * marsPosition.z);
+
+    // Calculate the magnitudes of the Earth and Mars position vectors
+    const earthMagnitude = Math.sqrt(Math.pow(earthPosition.x, 2) + Math.pow(earthPosition.y, 2) + Math.pow(earthPosition.z, 2));
+    const marsMagnitude = Math.sqrt(Math.pow(marsPosition.x, 2) + Math.pow(marsPosition.y, 2) + Math.pow(marsPosition.z, 2));
+
+    // Calculate the cosine of the phase angle
+    const cosTheta = dotProduct / (earthMagnitude * marsMagnitude);
+    let phaseAngle = Math.acos(cosTheta) * (180 / Math.PI);
+
+    // Determine the direction of the angle (positive if Mars is ahead, negative if Earth is ahead)
+    if (crossProductZ < 0) {
+      phaseAngle = -phaseAngle;
+    }
+
+    return phaseAngle;
+  }
+
+  predictLaunchWindow(earthOrbitPeriod: number, marsOrbitPeriod: number): number {
+    const requiredPhaseAngle = 180 - 360 * (earthOrbitPeriod / (earthOrbitPeriod + marsOrbitPeriod));
+    return requiredPhaseAngle;
+    // const synodicPeriod = 1 / Math.abs((1 / earthOrbitPeriod) - (1 / marsOrbitPeriod));
+    // // Return the time (in days) until the next launch window based on the synodic period
+    // return (requiredPhaseAngle / 360) * synodicPeriod;
   }
 
   // THREEJS CSS LABELS
