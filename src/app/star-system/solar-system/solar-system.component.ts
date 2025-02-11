@@ -112,6 +112,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   public earthMarsLaunchWindowAngle: any = 0;
   public rocketLaunched: boolean = false;
   public rocketArrived: boolean = false;
+  public missionToMarsRequested: boolean = false;
+  public missionStatus: string = '';
 
   constructor(private http: HttpClient) { }
 
@@ -678,6 +680,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     // 1) Don’t create a second rocket if we already have one in the integrator
     if (this.bodies.find(b => b.label === "rocket")) return;
 
+    this.missionStatus = 'Hohmann transfer in progress...';
     // Indices: 0 = Sun, 3 = Earth, 5 = Mars
     const sunBody = this.bodies[0];
     const earthBody = this.bodies[3];
@@ -748,6 +751,11 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     console.log("Hohmann transfer rocket launched!");
   }
 
+  public onMarsMissionClick(): void {
+    this.missionToMarsRequested = true;
+    this.missionStatus = 'Waiting for launch window';
+  }
+
 
   private animate(): void {
 
@@ -786,7 +794,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.earthMarsAngle = this.calculatePhaseAngle(this.planetMeshes['earth'].mesh.position, this.planetMeshes['mars'].mesh.position);
 
     //   4a) Before rocket is launched, check the Earth–Mars angle and see if it’s near the window:
-    if (!this.rocketLaunched && !this.rocketArrived) {
+    if (this.missionToMarsRequested && !this.rocketLaunched && !this.rocketArrived) {
       // First compute the Earth–Mars phase angle
       const earthPos = earth.position;  // from Earth mesh
       const marsPos = this.planetMeshes['mars'].mesh.position;
