@@ -462,6 +462,28 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     // 5) Give it a CSS label so you see "Rocket" text
     this.createLabelCSS("Rocket", rocketPlanet);
 
+    // 2) Use either initWithRing or initWithoutRing. 
+    //    Pass a placeholder texture if desired. 
+    //    The 4th argument is the 6-element state [x, y, z, vx, vy, vz]; 
+    //    initially zero if rocket has not launched.
+    rocketPlanet.init(
+      "/assets/solar-system/images/2k_pluto.jpeg",
+      "/assets/solar-system/images/2k_pluto_dark.png",
+      [0, 0, 0, 0, 0, 0],           // position & velocity will be set at launch
+      0,                            // tilt
+      ringSprite                    // to get the ring circle
+    );
+
+    // 3) Initially hide it (not launched). Or place it at Earth.
+    rocketPlanet.visible = false;  // Turn visible once launched
+
+    // 4) Add to the scene and store in planetMeshes
+    this.scene.add(rocketPlanet);
+    this.planetMeshes['rocket'].mesh = rocketPlanet;
+
+    // 5) Give it a CSS label so you see "Rocket" text
+    this.createLabelCSS("Rocket", rocketPlanet);
+
 
     // this.target = earth.position;
     // this.camera.position.copy(earth.position);
@@ -652,78 +674,78 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   }
 
   private launchHohmannTransfer(): void {
-    // 1) Safety check – skip if rocket already exists in the integrator
+
+    // 1) Don’t create a second rocket if we already have one in the integrator
     if (this.bodies.find(b => b.label === "rocket")) return;
 
-    // Index references: 0 = Sun, 3 = Earth, 5 = Mars
+    // Indices: 0 = Sun, 3 = Earth, 5 = Mars
     const sunBody = this.bodies[0];
     const earthBody = this.bodies[3];
     const marsBody = this.bodies[5];
 
-    // -------------------------
-    // 1) Compute Earth–Sun distance
-    // -------------------------
+    // Positions relative to the Sun (in whatever length-units your integrator uses)
     const rxE = earthBody.x - sunBody.x;
     const ryE = earthBody.y - sunBody.y;
     const rzE = earthBody.z - sunBody.z;
     const rEarth = Math.sqrt(rxE * rxE + ryE * ryE + rzE * rzE);
 
-    // -------------------------
-    // 2) Compute Mars–Sun distance
-    // -------------------------
     const rxM = marsBody.x - sunBody.x;
     const ryM = marsBody.y - sunBody.y;
     const rzM = marsBody.z - sunBody.z;
     const rMars = Math.sqrt(rxM * rxM + ryM * ryM + rzM * rzM);
 
-    // -------------------------
-    // 3) Earth’s orbital velocity (relative to Sun)
-    // -------------------------
+    // Earth’s orbital velocity (relative to the Sun)
     const vxE = earthBody.vx - sunBody.vx;
     const vyE = earthBody.vy - sunBody.vy;
     const vzE = earthBody.vz - sunBody.vz;
     const vEarthMag = Math.sqrt(vxE * vxE + vyE * vyE + vzE * vzE);
 
-    // -------------------------
-    // 4) Hohmann Transfer velocity at Earth’s orbit
-    //    Approx formula: vTransfer = vEarthMag * sqrt(2*rMars / (rEarth + rMars))
-    // -------------------------
-    const ratio = Math.sqrt((2 * rMars) / (rEarth + rMars));
-    const vTransfer = ratio * vEarthMag; // approximate elliptical velocity
+    // Decide if we’re transferring outward or inward
+    // (We want outward if Mars is actually farther than Earth.)
+    let vTransfer = 0;
+    if (rMars > rEarth) {
 
-    // The delta-v needed:
-    const deltaV = vTransfer - vEarthMag;
+      // ----- Outward Hohmann transfer to Mars -----
+      // Using the ratio approach:
+      // v_transfer = vEarth * sqrt( 2*rMars / (rEarth + rMars) )
+      const ratio = Math.sqrt((2 * rMars) / (rEarth + rMars));
+      vTransfer = vEarthMag * ratio;
 
-    // -------------------------
-    // 5) Direction of Earth’s orbital motion
-    //    (the unit vector in Earth’s velocity direction)
-    // -------------------------
+    } else {
+      // ----- Inward Hohmann (in case Mars is inside Earth’s orbit at this instant) -----
+      // v_transfer = vEarth * sqrt( 2*rMars / (rEarth + rMars) ), but that ratio < 1
+      // Actually we might want an explicit formula if going truly inward
+      const ratio = Math.sqrt((2 * rMars) / (rEarth + rMars));
+      vTransfer = vEarthMag * ratio;
+    }
+
+    // Delta-v needed
+    const deltaV = vTransfer - vEarthMag; // will be + if outward, – if inward
+
+    // Direction = Earth’s velocity direction
     const earthVelDir = new Vector3(vxE, vyE, vzE).normalize();
-
-    // Multiply by deltaV:
     const dvx = deltaV * earthVelDir.x;
     const dvy = deltaV * earthVelDir.y;
     const dvz = deltaV * earthVelDir.z;
 
-    // -------------------------
-    // 6) Create rocket in integrator array
-    // -------------------------
+    // Create the rocket in your integrator’s array
     this.bodies.push({
       label: "rocket",
-      mass: 1e-9, // negligible mass, so it doesn’t affect other bodies
+      mass: 1e-9, // small enough not to perturb anything
       x: earthBody.x,
       y: earthBody.y,
       z: earthBody.z,
       vx: earthBody.vx + dvx,
       vy: earthBody.vy + dvy,
-      vz: earthBody.vz + dvz
+      vz: earthBody.vz + dvz,
     });
 
-    // Make rocket planet visible
+    // Make the rocket mesh visible
     this.planetMeshes['rocket'].mesh.visible = true;
-    this.rocketLaunched = true;
 
-    console.log("Rocket Launched!");
+    // Mark that we’ve launched
+    this.rocketLaunched = true;
+    console.log("Hohmann transfer rocket launched!");
   }
 
 
