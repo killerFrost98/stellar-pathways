@@ -486,6 +486,12 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     // 5) Give it a CSS label so you see "Rocket" text
     this.createLabelCSS("Rocket", rocketPlanet);
 
+    const rocketArrow = new ArrowHelper(new Vector3(1, 0, 0), new Vector3(0, 0, 0), 0.2, 0xff0000);
+    // Attach the arrow to the rocket mesh so it moves with it.
+    rocketPlanet.add(rocketArrow);
+    // Store a reference for later updates.
+    this.planetMeshes['rocket'].arrowHelper = rocketArrow;
+
 
     // this.target = earth.position;
     // this.camera.position.copy(earth.position);
@@ -817,6 +823,15 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       // Update rocket position/rotation (spin factor = 0 for a spacecraft)
       this.planetMeshes['rocket'].mesh.updateFromRK4(rocketBody, dt * 0);
 
+      const velocity = new Vector3(rocketBody.vx, rocketBody.vy, rocketBody.vz);
+
+      // Only update if the velocity has a non-zero length.
+      if (velocity.length() > 0) {
+        // velocity.normalize();
+        // Update the arrow direction to match the velocity vector.
+        this.planetMeshes['rocket'].arrowHelper.setDirection(velocity);
+      }
+
       // Check distance to Mars to see if we’ve arrived
       const marsBody = this.bodies[5];
       const dx = rocketBody.x - marsBody.x;
@@ -828,6 +843,31 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       if (dist < 0.0005) {
         this.rocketArrived = true;
         console.log("Rocket has arrived at Mars!");
+      }
+
+      const rocketDistanceFromSun = new Vector3(rocketBody.x, rocketBody.y, rocketBody.z).length();
+      const marsDistanceFromSun = new Vector3(marsBody.x, marsBody.y, marsBody.z).length();
+      if (rocketDistanceFromSun > marsDistanceFromSun) {
+        this.rocketArrived = true;
+        this.missionStatus = "Mission successful.";
+
+        const rocketMesh = this.planetMeshes['rocket'].mesh;
+
+        // Remove any CSS2D labels attached to the rocket
+        for (let i = rocketMesh.children.length - 1; i >= 0; i--) {
+          const child = rocketMesh.children[i];
+          // Check if the child is a CSS2DObject
+          if (child instanceof CSS2DObject) {
+            // Remove the associated DOM element if present
+            if (child.element && child.element.parentNode) {
+              child.element.parentNode.removeChild(child.element);
+            }
+            rocketMesh.remove(child);
+          }
+        }
+
+        this.scene.remove(this.planetMeshes['rocket'].mesh);
+        this.bodies.splice(rocketIndex, 1);
       }
     }
 
