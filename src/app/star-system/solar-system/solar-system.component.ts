@@ -125,7 +125,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   }
 
   loadPlanetsData(): Observable<any> {
-    return this.http.get('./assets/solar-system/positions/positions.json');
+    return this.http.get('/stellar-pathways/assets/solar-system/positions/positions.json');
   }
 
   ngOnDestroy(): void {
@@ -168,9 +168,9 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     // SUN
     // ==================================================================================
-    const suntex = "/assets/solar-system/images/lens_flare_1.jpeg";
-    const flareCircle = "/assets/solar-system/images/lens_flare_circle_64x64.jpeg";
-    const flareHex = "/assets/solar-system/images/lens_flare_hexagon_256x256.jpeg";
+    const suntex = "/stellar-pathways/assets/solar-system/images/lens_flare_1.jpeg";
+    const flareCircle = "/stellar-pathways/assets/solar-system/images/lens_flare_circle_64x64.jpeg";
+    const flareHex = "/stellar-pathways/assets/solar-system/images/lens_flare_hexagon_256x256.jpeg";
     this.sun = new Sun();
     this.sun.setModelOne(suntex, flareCircle, flareHex);
     this.scene.add(this.sun);
@@ -180,7 +180,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     // ==================================================================================
     const sp = 1000000;
     //scaling factor, from python we use a 1e-7, here we sclae by 1e-6, so planets are 10 bigger
-    const ringSprite = new TextureLoader().load("/assets/solar-system/images/ring.png");
+    const ringSprite = new TextureLoader().load("/stellar-pathways/assets/solar-system/images/ring.png");
 
     this.planetMeshes =
     {
@@ -199,8 +199,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const mercury = new Planet(2439.7 / sp, 0xada8a5, this.camera, this.scene);
     mercury.init(
-      "/assets/solar-system/images/2k_mercury.jpeg",
-      "/assets/solar-system/images/2k_mercury_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_mercury.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_mercury_dark.png",
       this.pyData.svs.mercury, 0.0, ringSprite
     );
     this.scene.add(mercury);
@@ -208,15 +208,15 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const venus = new Planet(6051.8 / sp, 0xf8e2b0, this.camera, this.scene);
     venus.init(
-      "/assets/solar-system/images/2k_venus.jpeg",
-      "/assets/solar-system/images/2k_venus_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_venus.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_venus_dark.png",
       this.pyData.svs.venus, 177.4 * Math.PI / 180, ringSprite
     );
     this.scene.add(venus);
     this.planetMeshes['venus'].mesh = venus;
 
     const earth = new Earth3d(this.camera);
-    earth.loadTextures("/assets/solar-system/images/8081_earthmap10k.jpg", "/assets/solar-system/images/8081_earthlights10k.jpg");
+    earth.loadTextures("/stellar-pathways/assets/solar-system/images/8081_earthmap10k.jpg", "/stellar-pathways/assets/solar-system/images/8081_earthlights10k.jpg");
     this.scene.add(earth);
     earth.setPosition(this.pyData.svs.earth[0], this.pyData.svs.earth[1], this.pyData.svs.earth[2])
     earth.setSunOrigin();
@@ -284,8 +284,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const moon = new Planet(1737.4 / sp, 0xe5e5e5, this.camera, this.scene);
     moon.initWithoutRing(
-      "/assets/solar-system/images/2k_moon.jpeg",
-      "/assets/solar-system/images/moonuv_dark.jpg",
+      "/stellar-pathways/assets/solar-system/images/2k_moon.jpeg",
+      "/stellar-pathways/assets/solar-system/images/moonuv_dark.jpg",
       this.pyData.svs.moon, 6.8 * Math.PI / 180
     );
     this.scene.add(moon);
@@ -293,8 +293,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const mars = new Planet(3389.5 / sp, 0xE27B58, this.camera, this.scene);
     mars.init(
-      "/assets/solar-system/images/2k_mars.jpeg",
-      "/assets/solar-system/images/2k_mars_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_mars.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_mars_dark.png",
       this.pyData.svs.mars, 25.19 * Math.PI / 180, ringSprite
     );
     this.scene.add(mars);
@@ -302,8 +302,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const jupiter = new Planet(69911 / sp, 0x90614D, this.camera, this.scene);
     jupiter.init(
-      "/assets/solar-system/images/2k_jupiter.jpeg",
-      "/assets/solar-system/images/2k_jupiter_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_jupiter.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_jupiter_dark.png",
       this.pyData.svs.jupiter, 3.13 * Math.PI / 180, ringSprite
     );
     this.scene.add(jupiter);
@@ -311,8 +311,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const saturn = new Planet(58232 / sp, 0xe2bf7d, this.camera, this.scene);
     saturn.init(
-      "/assets/solar-system/images/2k_saturn.jpeg",
-      "/assets/solar-system/images/2k_saturn_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_saturn.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_saturn_dark.png",
       this.pyData.svs.saturn, 26.73 * Math.PI / 180, ringSprite
     );
     this.scene.add(saturn);
@@ -321,7 +321,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     const rstart = saturn.r * 1.3;
     const rend = saturn.r + rstart;
     const rmid = rstart + (rend - rstart) / 2;
-    const satring = "/assets/solar-system/images/2k_saturn_ring_alpha.png";
+    const satring = "/stellar-pathways/assets/solar-system/images/2k_saturn_ring_alpha.png";
     const satringGeo = new RingGeometry(rstart, rend, 128);
     const pos = satringGeo.attributes['position'];
     const satv = new Vector3();
@@ -341,8 +341,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const uranus = new Planet(25362 / sp, 0xafdbf5, this.camera, this.scene);
     uranus.init(
-      "/assets/solar-system/images/2k_uranus.jpeg",
-      "/assets/solar-system/images/2k_uranus_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_uranus.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_uranus_dark.png",
       this.pyData.svs.uranus, 97.77 * Math.PI / 180, ringSprite
     );
     this.scene.add(uranus);
@@ -350,8 +350,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const neptune = new Planet(24622 / sp, 0x657BA6, this.camera, this.scene);
     neptune.init(
-      "/assets/solar-system/images/2k_neptune.jpeg",
-      "/assets/solar-system/images/2k_neptune_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_neptune.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_neptune_dark.png",
       this.pyData.svs.neptune, 28.32 * Math.PI / 180, ringSprite
     );
     this.scene.add(neptune);
@@ -359,8 +359,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     const pluto = new Planet(1188.3 / sp, 0xced2d9, this.camera, this.scene);
     pluto.init(
-      "/assets/solar-system/images/2k_pluto.jpeg",
-      "/assets/solar-system/images/2k_pluto_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto_dark.png",
       this.pyData.svs.pluto, 120 * Math.PI / 180, ringSprite
     );
     this.scene.add(pluto);
@@ -447,8 +447,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     //    The 4th argument is the 6-element state [x, y, z, vx, vy, vz]; 
     //    initially zero if rocket has not launched.
     rocketPlanet.init(
-      "/assets/solar-system/images/2k_pluto.jpeg",
-      "/assets/solar-system/images/2k_pluto_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto_dark.png",
       [0, 0, 0, 0, 0, 0],           // position & velocity will be set at launch
       0,                            // tilt
       ringSprite                    // to get the ring circle
@@ -469,8 +469,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     //    The 4th argument is the 6-element state [x, y, z, vx, vy, vz]; 
     //    initially zero if rocket has not launched.
     rocketPlanet.init(
-      "/assets/solar-system/images/2k_pluto.jpeg",
-      "/assets/solar-system/images/2k_pluto_dark.png",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto.jpeg",
+      "/stellar-pathways/assets/solar-system/images/2k_pluto_dark.png",
       [0, 0, 0, 0, 0, 0],           // position & velocity will be set at launch
       0,                            // tilt
       ringSprite                    // to get the ring circle
@@ -504,7 +504,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     const assignSRGB = (texture: any) => {
       texture.colorSpace = SRGBColorSpace;
     };
-    const starSprite = new TextureLoader().load("/assets/solar-system/images/eyes_nasa.png", assignSRGB);
+    const starSprite = new TextureLoader().load("/stellar-pathways/assets/solar-system/images/eyes_nasa.png", assignSRGB);
     this.stars = new StarPoints(10000, starSprite);
     this.scene.add(this.stars);
 
