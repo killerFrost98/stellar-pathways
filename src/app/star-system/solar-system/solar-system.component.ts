@@ -125,7 +125,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   }
 
   loadPlanetsData(): Observable<any> {
-    return this.http.get('/stellar-pathways/assets/solar-system/positions/positions.json');
+    return this.http.get('/assets/solar-system/positions/positions.json');
   }
 
   ngOnDestroy(): void {
