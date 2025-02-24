@@ -23,8 +23,8 @@
   </div>
 </div>
 <div class="bottom-middle">
-  <span id="cam-distance">{{ camDistance | number:'1.0-0' }}</span> [km] time:
-  <span id="utctime">{{ utcTime | number:'1.0-0' }}</span>
+  <!-- <span id="cam-distance">{{ camDistance | number:'1.0-0' }}</span> [km] time: -->
+  <span id="utctime">{{ utcTime | date }}</span>
   <br>
   <span id="text-facts" style="font-size: 14px;">{{ currentFact }}</span>
 </div>

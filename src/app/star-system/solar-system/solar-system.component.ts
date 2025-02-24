@@ -45,7 +45,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   sp = 100000;
   EARHRADIUS: number = 6371.0 / this.sp;
   camDistance = 3.141;
-  utcTime = 0;
+  utcTime = new Date();
   currentFact = '';
   pyData = {
     svs: {
@@ -80,7 +80,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   private sun!: Sun;
   private planetMeshes: { [key: string]: any } = {};
   private target!: Vector3;
-  private spaceTime = 0;
   private dtSimScale = 1;
   private bodies: any[] = [];
   private bodies2: any[] = [];
@@ -581,8 +580,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
 
     this.dtSimScale = this.pyData.dt_sim_scale;
-    this.spaceTime = this.pyData.svs.timestamp;
-    this.utcTime = Math.floor(this.spaceTime);
+
     for (let i = 0; i < 2000; i += 1) {
 
       this.mercuryOrbit[0].push(this.bodies2[1].x);
@@ -768,9 +766,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       const animDt = this.clock.getDelta();
       this.stars.twinkle(animDt);
       const dt = this.dtSimScale * animDt;
-
-      this.spaceTime += dt;
-      this.utcTime = Math.floor(this.spaceTime);
+      this.utcTime = new Date(this.utcTime.getTime() + dt * 1000);
 
       rungeKutta4(this.bodies, dt);
       this.planetMeshes['mercury'].mesh.updateFromRK4(this.bodies[1], dt * (2 * Math.PI / (1407.6 * 60 * 60)));
