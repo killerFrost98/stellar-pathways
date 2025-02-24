@@ -18,6 +18,9 @@
     <button *ngIf="!this.missionToMarsRequested" (click)=" onMarsMissionClick() ">Mission to Mars!</button>
   </div>
   <div *ngIf="this.missionToMarsRequested">{{this.missionStatus}}</div>
+  <div>
+    <button (click)="togglePause()">{{ paused ? 'Resume' : 'Pause' }}</button>
+  </div>
 </div>
 <div class="bottom-middle">
   <span id="cam-distance">{{ camDistance | number:'1.0-0' }}</span> [km] time:

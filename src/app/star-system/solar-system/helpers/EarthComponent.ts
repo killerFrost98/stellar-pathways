@@ -11,7 +11,8 @@ import {
 } from 'three';
 
 const textureLoader = new TextureLoader();
-const EARHRADIUS = 6371.0 / 1000000;
+const sp = 100000;
+const EARHRADIUS = 6371.0 / sp;
 const atmosphere = {
   Kr: 0.0025,
   Km: 0.0010,

@@ -51,7 +51,6 @@ const fragmentShader: string = `
     void main() {
         float lightIntensity = max(dot(normalize(v3LightPosition), normalize(vPosition)), 0.0);
         float viewIntensity = max(dot(normalize(cps), normalize(vPosition)), 0.0);
-        //vec3 atmosphereColor = mix(vec3(0.0, 0.5, 1.0), vec3(0.8, 0.8, 1.0), lightIntensity);
         vec3 lightColor = normalize(color + 5.0);
         float maxlightColor = 1.2*max(max(lightColor.x, lightColor.y), lightColor.z);
         lightColor /= maxlightColor;
@@ -82,8 +81,8 @@ varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vSunDir;
 void main(void) {
-    vec3 t0 = texture2D( day_Texture, vUv ).rgb; // day
-    vec3 t1 = texture2D( night_Texture, vUv ).rgb; // night
+    vec3 t0 = texture2D( day_Texture, vUv ).rgb;
+    vec3 t1 = texture2D( night_Texture, vUv ).rgb;
     float NdotL = dot(normalize(vNormal), normalize(vSunDir));
     float y = smoothstep(-0.2, 0.2, NdotL);
     vec3 final_color = t0 * y + t1 * (1.0-y);
@@ -108,7 +107,6 @@ interface PlanetUniforms {
   };
 }
 
-
 export class Planet extends Mesh {
   r: number;
   colorHex: number;
@@ -117,7 +115,7 @@ export class Planet extends Mesh {
   spriteRing?: Sprite;
 
   constructor(r: number, colorHex: number, cam: Camera, scene: Scene) {
-    const PlanetUniforms = {
+    const planetUniforms = {
       v3LightPosition: {
         type: "v3",
         value: new Vector3(1, 0, 0)
@@ -132,7 +130,7 @@ export class Planet extends Mesh {
       }
     };
     const mat = new ShaderMaterial({
-      uniforms: PlanetUniforms,
+      uniforms: planetUniforms,
       vertexShader: vertexPlanet,
       fragmentShader: fragmentPlanet
     });
@@ -143,14 +141,14 @@ export class Planet extends Mesh {
 
     this.sunvect = new Vector3(1, 0, 0);
 
-    const colorRBG = hexToRgb(colorHex);
+    const colorRGB = hexToRgb(colorHex);
     const atmoPlanet = new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
         v3LightPosition: { value: new Vector3(1, 0, 0) },
         cps: { value: cam.position },
-        color: { value: new Vector3(colorRBG[0], colorRBG[1], colorRBG[2]) }
+        color: { value: new Vector3(colorRGB[0], colorRGB[1], colorRGB[2]) }
       },
       side: BackSide,
       transparent: true,
@@ -176,24 +174,24 @@ export class Planet extends Mesh {
     const night_Texture = textureLoader.load(pathNight);
     day_Texture.anisotropy = maxAnisotropy;
     night_Texture.anisotropy = maxAnisotropy;
-    //TODO
-    // this.material.uniforms.day_Texture.value = day_Texture;
-    // this.material.uniforms.night_Texture.value = night_Texture;
+    // Update the shader material uniforms with loaded textures
+    (this.material as ShaderMaterial).uniforms['day_Texture'].value = day_Texture;
+    (this.material as ShaderMaterial).uniforms['night_Texture'].value = night_Texture;
   }
 
   setSun(sun: Vector3): void {
     this.sunvect.copy(sun);
-    //TODO
-    // this.material.uniforms.v3LightPosition.value = this.sunvect;
-    // this.atm.material.uniforms.v3LightPosition.value = this.sunvect;
+    // Update the shader material uniforms for sun position
+    (this.material as ShaderMaterial).uniforms['v3LightPosition'].value = this.sunvect;
+    (this.atm.material as ShaderMaterial).uniforms['v3LightPosition'].value = this.sunvect;
   }
 
   setSunOrigin(): void {
     this.sunvect.copy(this.position);
     this.sunvect.normalize().negate();
-    //TODO
-    // this.material.uniforms.v3LightPosition.value = this.sunvect;
-    // this.atm.material.uniforms.v3LightPosition.value = this.sunvect;
+    // Update the shader material uniforms for sun position based on the origin
+    (this.material as ShaderMaterial).uniforms['v3LightPosition'].value = this.sunvect;
+    (this.atm.material as ShaderMaterial).uniforms['v3LightPosition'].value = this.sunvect;
   }
 
   setPosition(x: number, y: number, z: number): void {

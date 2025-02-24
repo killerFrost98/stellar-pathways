@@ -42,7 +42,8 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('rendererCanvas') private canvas!: ElementRef;
 
-  EARHRADIUS: number = 6371.0 / 1000000;
+  sp = 100000;
+  EARHRADIUS: number = 6371.0 / this.sp;
   camDistance = 3.141;
   utcTime = 0;
   currentFact = '';
@@ -114,6 +115,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
   public rocketArrived: boolean = false;
   public missionToMarsRequested: boolean = false;
   public missionStatus: string = '';
+  paused: boolean = false;
 
   constructor(private http: HttpClient) { }
 
@@ -178,8 +180,6 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     // PLANETS
     // ==================================================================================
-    const sp = 1000000;
-    //scaling factor, from python we use a 1e-7, here we sclae by 1e-6, so planets are 10 bigger
     const ringSprite = new TextureLoader().load("/stellar-pathways/assets/solar-system/images/ring.png");
 
     this.planetMeshes =
@@ -197,7 +197,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
       'rocket': { 'mesh': null }
     }
 
-    const mercury = new Planet(2439.7 / sp, 0xada8a5, this.camera, this.scene);
+    const mercury = new Planet(2439.7 / this.sp, 0xada8a5, this.camera, this.scene);
     mercury.init(
       "/stellar-pathways/assets/solar-system/images/2k_mercury.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_mercury_dark.png",
@@ -206,7 +206,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(mercury);
     this.planetMeshes['mercury'].mesh = mercury;
 
-    const venus = new Planet(6051.8 / sp, 0xf8e2b0, this.camera, this.scene);
+    const venus = new Planet(6051.8 / this.sp, 0xf8e2b0, this.camera, this.scene);
     venus.init(
       "/stellar-pathways/assets/solar-system/images/2k_venus.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_venus_dark.png",
@@ -282,7 +282,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     }));
     earth.add(earthRing);
 
-    const moon = new Planet(1737.4 / sp, 0xe5e5e5, this.camera, this.scene);
+    const moon = new Planet(1737.4 / this.sp, 0xe5e5e5, this.camera, this.scene);
     moon.initWithoutRing(
       "/stellar-pathways/assets/solar-system/images/2k_moon.jpeg",
       "/stellar-pathways/assets/solar-system/images/moonuv_dark.jpg",
@@ -291,7 +291,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(moon);
     this.planetMeshes['moon'].mesh = moon;
 
-    const mars = new Planet(3389.5 / sp, 0xE27B58, this.camera, this.scene);
+    const mars = new Planet(3389.5 / this.sp, 0xE27B58, this.camera, this.scene);
     mars.init(
       "/stellar-pathways/assets/solar-system/images/2k_mars.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_mars_dark.png",
@@ -300,7 +300,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(mars);
     this.planetMeshes['mars'].mesh = mars;
 
-    const jupiter = new Planet(69911 / sp, 0x90614D, this.camera, this.scene);
+    const jupiter = new Planet(69911 / this.sp, 0x90614D, this.camera, this.scene);
     jupiter.init(
       "/stellar-pathways/assets/solar-system/images/2k_jupiter.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_jupiter_dark.png",
@@ -309,7 +309,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(jupiter);
     this.planetMeshes['jupiter'].mesh = jupiter;
 
-    const saturn = new Planet(58232 / sp, 0xe2bf7d, this.camera, this.scene);
+    const saturn = new Planet(58232 / this.sp, 0xe2bf7d, this.camera, this.scene);
     saturn.init(
       "/stellar-pathways/assets/solar-system/images/2k_saturn.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_saturn_dark.png",
@@ -339,7 +339,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     saturnRing.rotation.x = Math.PI / 2 * 95;
     saturn.add(saturnRing);
 
-    const uranus = new Planet(25362 / sp, 0xafdbf5, this.camera, this.scene);
+    const uranus = new Planet(25362 / this.sp, 0xafdbf5, this.camera, this.scene);
     uranus.init(
       "/stellar-pathways/assets/solar-system/images/2k_uranus.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_uranus_dark.png",
@@ -348,7 +348,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(uranus);
     this.planetMeshes['uranus'].mesh = uranus;
 
-    const neptune = new Planet(24622 / sp, 0x657BA6, this.camera, this.scene);
+    const neptune = new Planet(24622 / this.sp, 0x657BA6, this.camera, this.scene);
     neptune.init(
       "/stellar-pathways/assets/solar-system/images/2k_neptune.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_neptune_dark.png",
@@ -357,7 +357,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.scene.add(neptune);
     this.planetMeshes['neptune'].mesh = neptune;
 
-    const pluto = new Planet(1188.3 / sp, 0xced2d9, this.camera, this.scene);
+    const pluto = new Planet(1188.3 / this.sp, 0xced2d9, this.camera, this.scene);
     pluto.init(
       "/stellar-pathways/assets/solar-system/images/2k_pluto.jpeg",
       "/stellar-pathways/assets/solar-system/images/2k_pluto_dark.png",
@@ -436,7 +436,7 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
     // 1) Create a minimal rocket Planet
     const rocketPlanet = new Planet(
-      500 / sp,          // A small radius for the rocket, but big enough to see
+      500 / this.sp,          // A small radius for the rocket, but big enough to see
       0xffffff,          // Rocket color
       this.camera,
       this.scene
@@ -764,110 +764,108 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
 
 
   private animate(): void {
+    if (!this.paused) {
+      const animDt = this.clock.getDelta();
+      this.stars.twinkle(animDt);
+      const dt = this.dtSimScale * animDt;
 
-    const animDt = this.clock.getDelta();
-    this.stars.twinkle(animDt);
-    const dt = this.dtSimScale * animDt;
+      this.spaceTime += dt;
+      this.utcTime = Math.floor(this.spaceTime);
 
-    this.spaceTime += dt;
-    this.utcTime = Math.floor(this.spaceTime);
+      rungeKutta4(this.bodies, dt);
+      this.planetMeshes['mercury'].mesh.updateFromRK4(this.bodies[1], dt * (2 * Math.PI / (1407.6 * 60 * 60)));
+      this.planetMeshes['venus'].mesh.updateFromRK4(this.bodies[2], dt * (2 * Math.PI / (-5832.5 * 60 * 60)));
+      this.planetMeshes['moon'].mesh.updateFromRK4(this.bodies[4], dt * (2 * Math.PI / (655.7 * 60 * 60)));
+      this.planetMeshes['mars'].mesh.updateFromRK4(this.bodies[5], dt * (2 * Math.PI / (24.6 * 60 * 60)));
+      this.planetMeshes['jupiter'].mesh.updateFromRK4(this.bodies[6], dt * (2 * Math.PI / (9.9 * 60 * 60)));
+      this.planetMeshes['saturn'].mesh.updateFromRK4(this.bodies[7], dt * (2 * Math.PI / (10.7 * 60 * 60)));
+      this.planetMeshes['uranus'].mesh.updateFromRK4(this.bodies[8], dt * (2 * Math.PI / (-17.2 * 60 * 60)));
+      this.planetMeshes['neptune'].mesh.updateFromRK4(this.bodies[9], dt * (2 * Math.PI / (16.1 * 60 * 60)));
+      this.planetMeshes['pluto'].mesh.updateFromRK4(this.bodies[10], dt * (2 * Math.PI / (153.3 * 60 * 60)));
+      const earth = this.planetMeshes['earth'].mesh as Earth3d;
+      earth.setPosition(this.bodies[3].x, this.bodies[3].y, this.bodies[3].z);
+      earth.rotation.y += -dt * (2 * Math.PI / (23.9 * 60 * 60)) * (this.rotCorrection || 1);
+      earth.updateAllRotations();
+      earth.setSunOrigin();
 
-    // const cam2target = new Vector3().copy(this.camera.position);
-    // this.camDistance = cam2target.distanceTo(this.target) * 1e5 * 1e2;
-
-    rungeKutta4(this.bodies, dt);
-    this.planetMeshes['mercury'].mesh.updateFromRK4(this.bodies[1], dt * (2 * Math.PI / (1407.6 * 60 * 60)));
-    this.planetMeshes['venus'].mesh.updateFromRK4(this.bodies[2], dt * (2 * Math.PI / (-5832.5 * 60 * 60)));
-    this.planetMeshes['moon'].mesh.updateFromRK4(this.bodies[4], dt * (2 * Math.PI / (655.7 * 60 * 60)));
-    this.planetMeshes['mars'].mesh.updateFromRK4(this.bodies[5], dt * (2 * Math.PI / (24.6 * 60 * 60)));
-    this.planetMeshes['jupiter'].mesh.updateFromRK4(this.bodies[6], dt * (2 * Math.PI / (9.9 * 60 * 60)));
-    this.planetMeshes['saturn'].mesh.updateFromRK4(this.bodies[7], dt * (2 * Math.PI / (10.7 * 60 * 60)));
-    this.planetMeshes['uranus'].mesh.updateFromRK4(this.bodies[8], dt * (2 * Math.PI / (-17.2 * 60 * 60)));
-    this.planetMeshes['neptune'].mesh.updateFromRK4(this.bodies[9], dt * (2 * Math.PI / (16.1 * 60 * 60)));
-    this.planetMeshes['pluto'].mesh.updateFromRK4(this.bodies[10], dt * (2 * Math.PI / (153.3 * 60 * 60)));
-    const earth = this.planetMeshes['earth'].mesh as Earth3d;
-    earth.setPosition(this.bodies[3].x, this.bodies[3].y, this.bodies[3].z);
-    earth.rotation.y += -dt * (2 * Math.PI / (23.9 * 60 * 60)) * (this.rotCorrection || 1);
-    earth.updateAllRotations();
-    earth.setSunOrigin();
-
-    if (this.selectedPlanet) {
-      this.controls.target.copy(this.target);
-      this.controls.update();
-    }
-    this.stats.update();
-
-    this.earthMarsAngle = this.calculatePhaseAngle(this.planetMeshes['earth'].mesh.position, this.planetMeshes['mars'].mesh.position);
-
-    //   4a) Before rocket is launched, check the Earth–Mars angle and see if it’s near the window:
-    if (this.missionToMarsRequested && !this.rocketLaunched && !this.rocketArrived) {
-      // First compute the Earth–Mars phase angle
-      const earthPos = earth.position;  // from Earth mesh
-      const marsPos = this.planetMeshes['mars'].mesh.position;
-      this.earthMarsAngle = this.calculatePhaseAngle(earthPos, marsPos);
-
-      // Compare to your predicted ideal angle
-      const angleError = Math.abs(
-        (this.earthMarsAngle - this.earthMarsLaunchWindowAngle) / this.earthMarsLaunchWindowAngle
-      );
-      if (angleError < 0.01) {
-        // If you want to auto-launch when we’re within 1% of the ideal angle:
-        this.launchHohmannTransfer();
+      if (this.selectedPlanet) {
+        this.controls.target.copy(this.target);
+        this.controls.update();
       }
-    }
+      this.stats.update();
 
-    //   4b) If rocket is launched, find it and update
-    const rocketIndex = this.bodies.findIndex(b => b.label === "rocket");
-    if (rocketIndex !== -1 && this.rocketLaunched && !this.rocketArrived) {
-      const rocketBody = this.bodies[rocketIndex];
-      // Update rocket position/rotation (spin factor = 0 for a spacecraft)
-      this.planetMeshes['rocket'].mesh.updateFromRK4(rocketBody, dt * 0);
+      this.earthMarsAngle = this.calculatePhaseAngle(this.planetMeshes['earth'].mesh.position, this.planetMeshes['mars'].mesh.position);
 
-      const velocity = new Vector3(rocketBody.vx, rocketBody.vy, rocketBody.vz);
+      //   4a) Before rocket is launched, check the Earth–Mars angle and see if it’s near the window:
+      if (this.missionToMarsRequested && !this.rocketLaunched && !this.rocketArrived) {
+        // First compute the Earth–Mars phase angle
+        const earthPos = earth.position;  // from Earth mesh
+        const marsPos = this.planetMeshes['mars'].mesh.position;
+        this.earthMarsAngle = this.calculatePhaseAngle(earthPos, marsPos);
 
-      // Only update if the velocity has a non-zero length.
-      if (velocity.length() > 0) {
-        // velocity.normalize();
-        // Update the arrow direction to match the velocity vector.
-        this.planetMeshes['rocket'].arrowHelper.setDirection(velocity);
+        // Compare to your predicted ideal angle
+        const angleError = Math.abs(
+          (this.earthMarsAngle - this.earthMarsLaunchWindowAngle) / this.earthMarsLaunchWindowAngle
+        );
+        if (angleError < 0.01) {
+          // If you want to auto-launch when we’re within 1% of the ideal angle:
+          this.launchHohmannTransfer();
+        }
       }
 
-      // Check distance to Mars to see if we’ve arrived
-      const marsBody = this.bodies[5];
-      const dx = rocketBody.x - marsBody.x;
-      const dy = rocketBody.y - marsBody.y;
-      const dz = rocketBody.z - marsBody.z;
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      //   4b) If rocket is launched, find it and update
+      const rocketIndex = this.bodies.findIndex(b => b.label === "rocket");
+      if (rocketIndex !== -1 && this.rocketLaunched && !this.rocketArrived) {
+        const rocketBody = this.bodies[rocketIndex];
+        // Update rocket position/rotation (spin factor = 0 for a spacecraft)
+        this.planetMeshes['rocket'].mesh.updateFromRK4(rocketBody, dt * 0);
 
-      // Adjust threshold for “Mars arrival” as you like
-      if (dist < 0.0005) {
-        this.rocketArrived = true;
-        console.log("Rocket has arrived at Mars!");
-      }
+        const velocity = new Vector3(rocketBody.vx, rocketBody.vy, rocketBody.vz);
 
-      const rocketDistanceFromSun = new Vector3(rocketBody.x, rocketBody.y, rocketBody.z).length();
-      const marsDistanceFromSun = new Vector3(marsBody.x, marsBody.y, marsBody.z).length();
-      if (rocketDistanceFromSun > marsDistanceFromSun) {
-        this.rocketArrived = true;
-        this.missionStatus = "Mission successful.";
-
-        const rocketMesh = this.planetMeshes['rocket'].mesh;
-
-        // Remove any CSS2D labels attached to the rocket
-        for (let i = rocketMesh.children.length - 1; i >= 0; i--) {
-          const child = rocketMesh.children[i];
-          // Check if the child is a CSS2DObject
-          if (child instanceof CSS2DObject) {
-            // Remove the associated DOM element if present
-            if (child.element && child.element.parentNode) {
-              child.element.parentNode.removeChild(child.element);
-            }
-            rocketMesh.remove(child);
-          }
+        // Only update if the velocity has a non-zero length.
+        if (velocity.length() > 0) {
+          // velocity.normalize();
+          // Update the arrow direction to match the velocity vector.
+          this.planetMeshes['rocket'].arrowHelper.setDirection(velocity);
         }
 
-        this.scene.remove(this.planetMeshes['rocket'].mesh);
-        this.bodies.splice(rocketIndex, 1);
+        // Check distance to Mars to see if we’ve arrived
+        const marsBody = this.bodies[5];
+        const dx = rocketBody.x - marsBody.x;
+        const dy = rocketBody.y - marsBody.y;
+        const dz = rocketBody.z - marsBody.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // Adjust threshold for “Mars arrival” as you like
+        if (dist < 0.0005) {
+          this.rocketArrived = true;
+          console.log("Rocket has arrived at Mars!");
+        }
+
+        const rocketDistanceFromSun = new Vector3(rocketBody.x, rocketBody.y, rocketBody.z).length();
+        const marsDistanceFromSun = new Vector3(marsBody.x, marsBody.y, marsBody.z).length();
+        if (rocketDistanceFromSun > marsDistanceFromSun) {
+          this.rocketArrived = true;
+          this.missionStatus = "Mission successful.";
+
+          const rocketMesh = this.planetMeshes['rocket'].mesh;
+
+          // Remove any CSS2D labels attached to the rocket
+          for (let i = rocketMesh.children.length - 1; i >= 0; i--) {
+            const child = rocketMesh.children[i];
+            // Check if the child is a CSS2DObject
+            if (child instanceof CSS2DObject) {
+              // Remove the associated DOM element if present
+              if (child.element && child.element.parentNode) {
+                child.element.parentNode.removeChild(child.element);
+              }
+              rocketMesh.remove(child);
+            }
+          }
+
+          this.scene.remove(this.planetMeshes['rocket'].mesh);
+          this.bodies.splice(rocketIndex, 1);
+        }
       }
     }
 
@@ -876,7 +874,14 @@ export class SolarSystemComponent implements AfterViewInit, OnDestroy {
     this.labelRenderer.render(this.scene, this.camera);
   };
 
-
+  togglePause(): void {
+    this.paused = !this.paused;
+    if (this.paused) {
+      this.clock.stop();
+    } else {
+      this.clock.start();
+    }
+  }
 
   onPlanetSelect(event: any): void {
     const key = event.target.value.toLowerCase();
