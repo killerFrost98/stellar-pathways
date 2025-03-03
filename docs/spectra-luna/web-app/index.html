@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Spectral Transformer Inference</title>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@kurkle/color"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 300px;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Spectral Transformer Inference</h1>
+    <p>Adjust spectral data values interactively:</p>
+    <canvas id="spectralChart"></canvas>
+    <br>
+    <button id="runInferenceButton">Run Inference</button>
+    <h2>Output</h2>
+    <pre id="output"></pre>
+    <!-- <h2>Attention Map</h2>
+    <canvas id="attentionChart"></canvas> -->
+
+    <script>
+        let session;
+        let inferenceParams;
+        let CLASS_NAMES = {};
+        let spectralData = [2732.000000, 4128.000000, 4139.000000, 3894.000000, 4211.000000, 4382.000000, 4336.000000,
+            4242.000000,
+            4096.000000, 3828.000000, 3750.000000, 3627.000000, 2797.000000, 3672.000000, 3724.000000, 3730.000000,
+            2779.000000, 2565.000000,
+            3135.000000, 3010.000000, 2889.000000, 2827.000000, 2714.000000, 2623.000000, 2561.000000, 2487.000000,
+            2372.000000, 2351.000000,
+            2303.000000, 2208.000000, 2434.000000, 2196.000000, 2449.000000, 3016.000000, 2797.000000, 4291.000000,
+            5634.000000, 6645.000000,
+            6896.000000, 4919.000000, 7239.000000, 7410.000000, 7095.000000, 6983.000000, 6422.000000, 5913.000000,
+            6250.000000, 6728.000000,
+            6630.000000, 6609.000000, 6556.000000, 6530.000000, 6407.000000, 5275.000000, 5003.000000, 4873.000000,
+            4326.000000, 2561.000000,
+            2745.000000, 2938.000000, 3820.000000, 4387.000000, 4931.000000, 5235.000000, 5126.000000, 5172.000000,
+            5140.000000, 5145.000000,
+            5108.000000, 5047.000000, 4909.000000, 4868.000000, 4697.000000, 4515.000000, 3964.000000, 3201.000000,
+            1872.000000, 1689.000000,
+            1913.000000, 1845.000000, 2323.000000, 2862.000000, 2954.000000, 2978.000000, 2968.000000, 2922.000000,
+            3058.000000, 3159.000000,
+            3231.000000, 3172.000000, 3091.000000, 2776.000000, 2841.000000, 2969.000000, 2774.000000, 2947.000000,
+            2908.000000, 2707.000000,
+            2408.000000, 2162.000000, 1741.000000, 1474.000000, 1065.000000, 1030.000000, 1032.000000, 1050.000000,
+            1041.000000, 1091.000000,
+            1098.000000, 1091.000000, 1117.000000, 1216.000000, 1290.000000, 1352.000000, 1420.000000, 1456.000000,
+            1496.000000, 1515.000000,
+            1530.000000, 1501.000000, 1506.000000, 1539.000000, 1536.000000, 1539.000000, 1572.000000, 1578.000000,
+            1560.000000, 1557.000000,
+            1552.000000, 1531.000000, 1524.000000, 1491.000000, 1470.000000, 1438.000000, 1417.000000, 1375.000000,
+            1341.000000, 1324.000000,
+            1301.000000, 1250.000000, 1180.000000, 1136.000000, 1063.000000, 1036.000000, 1020.000000, 1007.000000,
+            1015.000000, 1034.000000,
+            1048.000000, 1031.000000, 1014.000000, 1020.000000, 1039.000000, 1064.000000, 1075.000000, 1053.000000,
+            1048.000000, 1065.000000,
+            1077.000000, 1081.000000, 1082.000000, 1088.000000, 1089.000000, 1083.000000, 1083.000000, 1088.000000,
+            1080.000000, 1085.000000,
+            1081.000000, 1083.000000, 1082.000000, 1088.000000, 1092.000000, 1082.000000, 1076.000000, 1068.000000,
+            1066.000000, 1063.000000,
+            1060.000000, 1050.000000, 1049.000000, 1048.000000, 1052.000000, 1046.000000, 1034.000000, 1028.000000,
+            1030.000000, 1026.000000,
+            1026.000000, 1022.000000, 1028.000000, 1017.000000, 1028.000000, 1012.000000, 1014.000000, 1014.000000,
+            1011.000000, 1012.000000,
+            998.000000, 1005.000000
+        ];
+        let attentionWeights = new Array(200).fill(0);
+
+        async function loadModel() {
+            const outputElem = document.getElementById("output");
+            try {
+                const modelUrl = "../model/SpectralTransformer.onnx";
+                session = await ort.InferenceSession.create(modelUrl);
+                outputElem.textContent += "[SUCCESS] ONNX model loaded successfully.\n";
+            } catch (err) {
+                outputElem.textContent += "[ERROR] Failed to load ONNX model: " + err + "\n";
+            }
+        }
+
+        async function loadInferenceParameters() {
+            const outputElem = document.getElementById("output");
+            try {
+                const response = await fetch("../model/inference_params.json");
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                inferenceParams = await response.json();
+                outputElem.textContent += "[SUCCESS] Loaded inference parameters successfully.\n";
+                CLASS_NAMES = inferenceParams.CLASS_NAMES || {};
+            } catch (err) {
+                outputElem.textContent += "[ERROR] Failed to load inference parameters: " + err + "\n";
+            }
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('spectralChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({
+                        length: 200
+                    }, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Spectral Data',
+                        data: spectralData,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        pointRadius: 3,
+                        pointBackgroundColor: 'red'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        dragData: {
+                            round: 0,
+                            onDrag: function (event, datasetIndex, index, value) {
+                                spectralData[index] = value;
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Band Index"
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Intensity"
+                            },
+                            min: 0,
+                            max: 10000
+                        }
+                    }
+                }
+            });
+        }
+
+        function createAttentionMap() {
+            const ctx = document.getElementById('attentionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({
+                        length: 200
+                    }, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Attention Weights',
+                        data: attentionWeights,
+                        backgroundColor: 'rgba(255, 0, 0, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Band Index"
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Attention Weight"
+                            },
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        async function runInference() {
+            const outputElem = document.getElementById("output");
+            outputElem.textContent = "";
+            if (!inferenceParams || !inferenceParams.band_min || !inferenceParams.band_max) {
+                outputElem.textContent += "[ERROR] Inference parameters not loaded.\n";
+                return;
+            }
+
+            const numBands = spectralData.length;
+            const bandMin = inferenceParams.band_min;
+            const bandMax = inferenceParams.band_max;
+
+            if (bandMin.length !== numBands || bandMax.length !== numBands) {
+                outputElem.textContent +=
+                    `[ERROR] Input length (${numBands}) does not match expected bands (${bandMin.length}).\n`;
+                return;
+            }
+
+            const normalizedData = new Float32Array(numBands);
+            for (let i = 0; i < numBands; i++) {
+                normalizedData[i] = (spectralData[i] - bandMin[i]) / ((bandMax[i] - bandMin[i]) + 1e-6);
+            }
+
+            const inputTensor = new ort.Tensor("float32", normalizedData, [1, numBands]);
+
+            try {
+                const feeds = {};
+                const inputNames = session.inputNames;
+                feeds[inputNames[0]] = inputTensor;
+                const results = await session.run(feeds);
+                const outputData = Array.from(results.output.data);
+                const predictions = outputData.map((value, index) => ({
+                    index,
+                    value
+                }));
+                predictions.sort((a, b) => b.value - a.value);
+                const top3 = predictions.slice(0, 3);
+                let resultText = "[INFO] Top 3 Predictions:\n";
+                top3.forEach(prediction => {
+                    const label = CLASS_NAMES[prediction.index] ||
+                        `Class ${prediction.index}`;
+                    resultText += `${label}: ${prediction.value}\n`;
+                });
+                outputElem.textContent += resultText;
+                // attentionWeights = results["attention_weights"].data;
+                // createAttentionMap();
+            } catch (err) {
+                outputElem.textContent += "[ERROR] Model inference failed: " + err + "\n";
+            }
+        }
+
+        document.getElementById("runInferenceButton").addEventListener("click", runInference);
+        loadModel();
+        loadInferenceParameters();
+        createChart();
+    </script>
+</body>
+
+</html>
