@@ -8,14 +8,6 @@
   <!-- Google Font for a modern look -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
   <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow-x: hidden;
-    }
-
     /* Base dark mode styling */
 
     body {
@@ -24,6 +16,7 @@
       font-family: 'Montserrat', sans-serif;
       line-height: 1.6;
       margin: 20px;
+      padding: 20px;
       animation: fadeIn 1.5s ease-in-out;
     }
 
@@ -66,6 +59,10 @@
       padding: 2px 4px;
       border-radius: 3px;
       color: #ffb86c;
+    }
+
+    .cpu-architecture {
+      margin: 30px;
     }
 
     .highlight {
@@ -144,181 +141,205 @@
         opacity: 1;
       }
     }
-
   </style>
 </head>
 
 <body>
-  <h1>Understanding CPU Architecture: A Deep Dive</h1>
-  <p>This page explains the fundamental concepts of CPU architecture and clarifies common misconceptions about how processors
-    work.
-  </p>
+  <div class="cpu-architecture">
+    <h1>Understanding CPU Architecture: A Deep Dive</h1>
+    <p>This page explains the fundamental concepts of CPU architecture and clarifies common misconceptions about how processors
+      work.</p>
 
-  <h2>1. How CPUs Work: The Instruction Pipeline</h2>
-  <p>At the heart of a CPU's operation is the instruction pipeline. Think of it as an assembly line where instructions are processed
-    in stages. It's crucial to understand that the instructions we write (in assembly language or a higher-level language
-    that compiles down to assembly) are
-    <em>not</em> directly executed by the Arithmetic Logic Units (ALUs). Instead, there's an intermediate step.</p>
+    <h2>1. How CPUs Work: The Instruction Pipeline</h2>
+    <p>At the heart of a CPU's operation is the instruction pipeline. Think of it as an assembly line where instructions are
+      processed in stages. It's crucial to understand that the instructions we write (in assembly language or a higher-level
+      language that compiles down to assembly) are
+      <em>not</em> directly executed by the Arithmetic Logic Units (ALUs). Instead, there's an intermediate step.</p>
 
-  <p class="note">
-    <strong>Note:</strong> Grasping the instruction pipeline is essential, as it highlights how modern processors manage parallelism
-    and optimize execution by breaking tasks into smaller, manageable micro-operations.</p>
+    <!-- Updated Diagram Image -->
+    <img src="/assets/solar-system/images/apple-micro-arch.jpg" alt="CPU Instruction Pipeline Diagram" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;"
+    />
 
-  <!-- Updated Diagram Image -->
-  <img src="/assets/solar-system/images/apple-micro-arch.jpg" alt="CPU Instruction Pipeline Diagram" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;"
-  />
+    <div class="diagram-placeholder">Conceptual Diagram: Instruction → Decoder → Micro-ops → Scheduler → Execution Units (ALUs) → Retirement Buffer</div>
 
-  <div class="diagram-placeholder">Conceptual Diagram: Instruction → Decoder → Micro-ops → Scheduler → Execution Units (ALUs) → Retirement Buffer</div>
+    <p>Here's a breakdown of the key components:</p>
+    <ul>
+      <li>
+        <strong>Instructions:</strong> These are the commands we write (e.g., "add", "multiply", "load from memory"). Even high-level
+        languages ultimately get translated into machine instructions.
+      </li>
+      <li>
+        <strong>Decoder:</strong> This stage translates written instructions into
+        <span class="highlight">micro-operations</span> (micro-ops). A single assembly instruction might translate into one or more micro-ops depending
+        on its complexity.
+      </li>
+      <li>
+        <strong>Micro-ops:</strong> These are the fundamental operations that the execution units can perform. They are specific
+        to the CPU's microarchitecture and are not directly visible to the programmer.
+      </li>
+      <li>
+        <strong>Scheduler:</strong> Modern CPUs are "out-of-order" processors. The scheduler reorders micro-ops for optimized execution,
+        provided that data dependencies are maintained.
+      </li>
+      <li>
+        <strong>Execution Units (ALUs):</strong> These perform the actual computations. A CPU typically has a limited number of versatile
+        ALUs that handle various micro-ops in parallel.
+      </li>
+      <li>
+        <strong>Register Files:</strong> These are small, ultra-fast storage areas within the CPU that hold operands and computation
+        results, often using techniques like register renaming to improve efficiency.
+      </li>
+      <li>
+        <strong>Retirement Buffer (Reorder Buffer):</strong> This component finalizes the results of executed micro-ops. It handles
+        speculative execution and ensures that only correct operations affect the system state.
+      </li>
+      <li>
+        <strong>Branch Predictor:</strong> Predicts the outcome of conditional branches to reduce pipeline stalls.
+      </li>
+      <li>
+        <strong>Buffer Cache:</strong> Small, fast memory that temporarily stores frequently accessed data to speed up memory operations.
+      </li>
+    </ul>
 
-  <p>Here's a breakdown of the key components:</p>
-  <ul>
-    <li>
-      <strong>Instructions:</strong> These are the commands we write (e.g., "add", "multiply", "load from memory"). Even high-level
-      languages ultimately get translated into machine instructions.</li>
-    <li>
-      <strong>Decoder:</strong> This stage translates written instructions into
-      <span class="highlight">micro-operations</span> (micro-ops). A single assembly instruction might translate into one or more micro-ops depending
-      on its complexity.</li>
-    <li>
-      <strong>Micro-ops:</strong> These are the fundamental operations that the execution units can perform. They are specific to
-      the CPU's microarchitecture and are not directly visible to the programmer.</li>
-    <li>
-      <strong>Scheduler:</strong> Modern CPUs are "out-of-order" processors. The scheduler reorders micro-ops for optimized execution,
-      provided that data dependencies are maintained.</li>
-    <li>
-      <strong>Execution Units (ALUs):</strong> These perform the actual computations. A CPU typically has a limited number of versatile
-      ALUs that handle various micro-ops in parallel.</li>
-    <li>
-      <strong>Register Files:</strong> These are small, ultra-fast storage areas within the CPU that hold operands and computation
-      results, often using techniques like register renaming to improve efficiency.</li>
-    <li>
-      <strong>Retirement Buffer (Reorder Buffer):</strong> This component finalizes the results of executed micro-ops. It handles
-      speculative execution and ensures that only correct operations affect the system state.</li>
-    <li>
-      <strong>Branch Predictor:</strong> Predicts the outcome of conditional branches to reduce pipeline stalls.</li>
-    <li>
-      <strong>Buffer Cache:</strong> Small, fast memory that temporarily stores frequently accessed data to speed up memory operations.</li>
-  </ul>
+    <p class="note">
+      <strong>Note:</strong> Introducing an extra layer of abstraction between the high-level instruction set and the micro-operations—much
+      like Java’s "write once, run anywhere" philosophy—allows different architectures/core types (such as power cores and efficiency cores)
+      to optimize execution in ways tailored to their designs. This approach ensures that even if the same instruction is
+      processed differently, overall performance remains consistent and efficient.
+    </p>
 
-  <h2>2. Types of ALUs and Buffer Cache</h2>
-  <p>CPUs include various specialized units to optimize different kinds of operations:</p>
-  <ul>
-    <li>
-      <strong>Address Generation Units (AGUs):</strong> Calculate memory addresses for load and store operations.</li>
-    <li>
-      <strong>Arithmetic Logic Units (ALUs):</strong> Perform integer arithmetic and logical operations (addition, subtraction, AND,
-      OR, XOR, etc.).</li>
-    <li>
-      <strong>Branch Units:</strong> Handle branch instructions, such as jumps and conditional jumps.</li>
-    <li>
-      <strong>Floating-Point/Vector Units:</strong> Handle floating-point arithmetic and SIMD (Single Instruction, Multiple Data)
-      operations.
-    </li>
-    <li>
-      <strong>Load/Store Units:</strong> Manage data movement between CPU registers and memory (cache or main RAM).</li>
-  </ul>
-  <p>
-    <strong>Buffer Cache:</strong> CPUs use a hierarchy of caches (L1, L2, L3) to speed up memory access. These caches store copies
-    of frequently used data from main memory, with L1 being the fastest and smallest, and L3 being larger but slower.</p>
-  <p class="note">
-    <strong>Note:</strong> Each specialized unit and the cache hierarchy play a crucial role in optimizing performance by ensuring
-    that data and instructions are available exactly when needed.</p>
+    <h2>2. Types of ALUs and Buffer Cache</h2>
+    <p>CPUs include various specialized units to optimize different kinds of operations:</p>
+    <ul>
+      <li>
+        <strong>Address Generation Units (AGUs):</strong> Calculate memory addresses for load and store operations.
+      </li>
+      <li>
+        <strong>Arithmetic Logic Units (ALUs):</strong> Perform integer arithmetic and logical operations (addition, subtraction,
+        AND, OR, XOR, etc.).
+      </li>
+      <li>
+        <strong>Branch Units:</strong> Handle branch instructions, such as jumps and conditional jumps.
+      </li>
+      <li>
+        <strong>Floating-Point/Vector Units:</strong> Handle floating-point arithmetic and SIMD (Single Instruction, Multiple Data)
+        operations.
+      </li>
+      <li>
+        <strong>Load/Store Units:</strong> Manage data movement between CPU registers and memory (cache or main RAM).
+      </li>
+    </ul>
+    <p>
+      <strong>Buffer Cache:</strong> CPUs use a hierarchy of caches (L1, L2, L3) to speed up memory access. These caches store copies
+      of frequently used data from main memory, with L1 being the fastest and smallest, and L3 being larger but slower.
+    </p>
 
-  <h2>3. Power Cores vs. Efficiency Cores</h2>
-  <p>Modern processors, especially in mobile and laptop devices, often incorporate a mix of "power" cores (P-cores) and "efficiency"
-    cores (E-cores) to balance performance and power consumption.</p>
-  <ul>
-    <li>
-      <strong>Power Cores (P-cores):</strong> Designed for high-performance tasks. They feature wider execution pipelines, larger
-      caches, and higher clock speeds, which come at the cost of increased power consumption.</li>
-    <li>
-      <strong>Efficiency Cores (E-cores):</strong> Optimized for power efficiency. They have simpler pipelines and lower clock speeds,
-      making them ideal for background tasks and energy-sensitive operations.</li>
-  </ul>
-  <p class="note">
-    <strong>Note:</strong> The use of heterogeneous cores allows modern CPUs to dynamically allocate resources, maximizing performance
-    for demanding applications while conserving energy during less intensive tasks.</p>
+    <h2>3. Power Cores vs. Efficiency Cores</h2>
+    <p>Modern processors, especially in mobile and laptop devices, often incorporate a mix of "power" cores (P-cores) and "efficiency"
+      cores (E-cores) to balance performance and power consumption.</p>
+    <ul>
+      <li>
+        <strong>Power Cores (P-cores):</strong> Designed for high-performance tasks. They feature wider execution pipelines, larger
+        caches, and higher clock speeds, which come at the cost of increased power consumption.
+      </li>
+      <li>
+        <strong>Efficiency Cores (E-cores):</strong> Optimized for power efficiency. They have simpler pipelines and lower clock
+        speeds, making them ideal for background tasks and energy-sensitive operations.
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Note:</strong> The use of heterogeneous cores allows modern CPUs to dynamically allocate resources, maximizing performance
+      for demanding applications while conserving energy during less intensive tasks.
+    </p>
 
-  <h2>4. Key Differences Between ARM (Apple M-series) and x86-64 (Intel/AMD)</h2>
-  <p>One common misconception is that the number of instructions in an ISA directly determines performance. While x86-64 has
-    many more instructions than ARM, the key difference lies in the instruction decoding process.</p>
-  <p>The
-    <em>instruction decoding</em> stage is where major differences arise:</p>
-  <ul>
-    <li>
-      <strong>ARM (fixed-length instructions):</strong> With fixed-length instructions (typically 32 or 64 bits), decoding is simpler
-      and more parallelizable. For instance, Apple M-series chips can have multiple decoders working concurrently.</li>
-    <li>
-      <strong>x86-64 (variable-length instructions):</strong> Variable-length instructions (ranging from 1 to 15 bytes) complicate
-      parallel decoding. Complex decoders are required to identify instruction boundaries, which can limit throughput.</li>
-  </ul>
-  <p>
-    <strong>Strict vs. Relaxed Memory Ordering:</strong>
-  </p>
-  <ul>
-    <li>
-      <strong>x86-64 (strict memory ordering):</strong> Enforces tighter rules on memory operations, ensuring more predictable behavior
-      at the cost of performance overhead.</li>
-    <li>
-      <strong>ARM (relaxed memory ordering):</strong> Offers greater flexibility in reordering memory operations, potentially boosting
-      performance but requiring explicit memory barriers in software.</li>
-  </ul>
-  <p class="note">
-    <strong>Note:</strong> These architectural differences not only affect performance but also influence software design and optimization
-    strategies, particularly in the context of parallel processing and memory management.</p>
+    <h2>4. Key Differences Between ARM (Apple M-series) and x86-64 (Intel/AMD)</h2>
+    <p>One common misconception is that the number of instructions in an ISA directly determines performance. While x86-64 has
+      many more instructions than ARM, the key difference lies in the instruction decoding process.</p>
+    <p>The
+      <em>instruction decoding</em> stage is where major differences arise:</p>
+    <ul>
+      <li>
+        <strong>ARM (fixed-length instructions):</strong> With fixed-length instructions (typically 32 or 64 bits), decoding is simpler
+        and more parallelizable. For instance, Apple M-series chips can have multiple decoders working concurrently.
+      </li>
+      <li>
+        <strong>x86-64 (variable-length instructions):</strong> Variable-length instructions (ranging from 1 to 15 bytes) complicate
+        parallel decoding. Complex decoders are required to identify instruction boundaries, which can limit throughput.
+      </li>
+    </ul>
+    <p>
+      <strong>Strict vs. Relaxed Memory Ordering:</strong>
+    </p>
+    <ul>
+      <li>
+        <strong>x86-64 (strict memory ordering):</strong> Enforces tighter rules on memory operations, ensuring more predictable
+        behavior at the cost of performance overhead.
+      </li>
+      <li>
+        <strong>ARM (relaxed memory ordering):</strong> Offers greater flexibility in reordering memory operations, potentially boosting
+        performance but requiring explicit memory barriers in software.
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Note:</strong> ARM's fixed-length instruction format allows the processor to move seamlessly from one instruction to
+      the next without waiting to guess the location of subsequent instructions. This minimizes idle time in the APU and
+      leads to faster, more efficient execution.
+    </p>
 
-  <h2>5. Rosetta 2: Efficient Emulation</h2>
-  <p>Apple's Rosetta 2 is a translation layer that allows applications built for x86-64 to run on ARM-based Apple Silicon. Its
-    efficiency is largely due to hardware support within the M-series chips.</p>
-  <p>
-    <strong>Why is Rosetta 2 so effective?</strong>
-    <br> The hardware can switch its memory model between ARM’s relaxed ordering and x86-64’s strict ordering depending on the
-    code being executed. This flexibility minimizes the performance penalties typically associated with emulation.
-  </p>
-  <ul>
-    <li>
-      <strong>Memory Model Switching:</strong> The hardware seamlessly transitions its memory model to align with the emulated x86-64
-      instructions, avoiding costly software emulation.</li>
-    <li>
-      <strong>Flag Register Handling:</strong> Specialized hardware support ensures that flag registers, which differ between the
-      two architectures, are managed efficiently.</li>
-  </ul>
-  <p class="note">
-    <strong>Note:</strong> Rosetta 2 exemplifies how thoughtful hardware design can bridge architectural differences, ensuring compatibility
-    without significantly compromising performance.</p>
+    <h2>5. Rosetta 2: Efficient Emulation</h2>
+    <p>Apple's Rosetta 2 is a translation layer that allows applications built for x86-64 to run on ARM-based Apple Silicon.
+      Its efficiency is largely due to hardware support within the M-series chips.</p>
+    <p>
+      <strong>Why is Rosetta 2 so effective?</strong>
+      <br> The hardware can switch its memory model between ARM’s relaxed ordering and x86-64’s strict ordering depending on
+      the code being executed. This flexibility minimizes the performance penalties typically associated with emulation.
+    </p>
+    <ul>
+      <li>
+        <strong>Memory Model Switching:</strong> The hardware seamlessly transitions its memory model to align with the emulated
+        x86-64 instructions, avoiding costly software emulation.
+      </li>
+      <li>
+        <strong>Flag Register Handling:</strong> Specialized hardware support ensures that flag registers, which differ between the
+        two architectures, are managed efficiently.
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Note:</strong> Rosetta 2 exemplifies how thoughtful hardware design can bridge architectural differences, ensuring
+      compatibility without significantly compromising performance.
+    </p>
 
-  <h2>6. Speculative Execution and Branch Prediction</h2>
-  <p>Modern CPUs employ
-    <span class="highlight">speculative execution</span> to boost performance by predicting the outcome of branches and executing instructions ahead
-    of time.</p>
-  <ol>
-    <li>
-      <strong>Branch Prediction:</strong> The processor anticipates the path a branch will take by analyzing past behavior, reducing
-      delays in instruction fetching.</li>
-    <li>
-      <strong>Speculative Execution:</strong> Based on predictions, the CPU processes instructions along the predicted path, though
-      these are not immediately committed.</li>
-    <li>
-      <strong>Retirement:</strong> Once the branch outcome is confirmed, the CPU either commits the results or discards them if the
-      prediction was incorrect, incurring a performance penalty.
-      <ul>
-        <li>
-          <strong>Correct Prediction:</strong> The speculatively executed instructions are committed, saving valuable processing
-          time.
-        </li>
-        <li>
-          <strong>Incorrect Prediction (Misprediction):</strong> The speculative work is discarded, and the pipeline is flushed,
-          which can significantly impact performance.</li>
-      </ul>
-    </li>
-  </ol>
-  <p>
-    Despite the benefits, speculative execution can sometimes lead to security vulnerabilities (e.g., Spectre, Meltdown) by inadvertently
-    exposing sensitive data through side channels.
-  </p>
-  <p class="note">
-    <strong>Note:</strong> While speculative execution enhances performance, it introduces security challenges that continue to drive
-    research into safer processor designs.</p>
+    <h2>6. Speculative Execution and Branch Prediction</h2>
+    <p>Modern CPUs employ
+      <span class="highlight">speculative execution</span> to boost performance by predicting the outcome of branches and executing instructions
+      ahead of time.</p>
+    <ol>
+      <li>
+        <strong>Branch Prediction:</strong> The processor anticipates the path a branch will take by analyzing past behavior, reducing
+        delays in instruction fetching.
+      </li>
+      <li>
+        <strong>Speculative Execution:</strong> Based on predictions, the CPU processes instructions along the predicted path, though
+        these are not immediately committed.
+      </li>
+      <li>
+        <strong>Retirement:</strong> Once the branch outcome is confirmed, the CPU either commits the results or discards them if
+        the prediction was incorrect, incurring a performance penalty.
+        <ul>
+          <li>
+            <strong>Correct Prediction:</strong> The speculatively executed instructions are committed, saving valuable processing
+            time.
+          </li>
+          <li>
+            <strong>Incorrect Prediction (Misprediction):</strong> The speculative work is discarded, and the pipeline is flushed,
+            which can significantly impact performance.
+          </li>
+        </ul>
+      </li>
+    </ol>
+    <!-- Note removed from this section -->
+
+  </div>
 </body>
 
 </html>
