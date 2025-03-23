@@ -4,8 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-noether-theorem',
   standalone: true,
   imports: [],
-  templateUrl: './noether-theorem.component.html',
-  styleUrl: './noether-theorem.component.scss'
+  templateUrl: './noether-theorem.component.html'
 })
 export class NoetherTheoremComponent {
 

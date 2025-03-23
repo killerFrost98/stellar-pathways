@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./blog/noether-theorem/noether-theorem.component').then(m => m.NoetherTheoremComponent)
   },
   {
+    path: 'cpu-architecture',
+    loadComponent: () => import('./blog/cpu-micro-architecture/cpu-micro-architecture.component').then(m => m.CpuMicroArchitectureComponent)
+  },
+  {
     path: '**',
     redirectTo: 'solar-system'
   }
