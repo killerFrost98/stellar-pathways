@@ -1,0 +1,177 @@
+/* Example dark theme variables */
+:root {
+  --bg-color: #121212;
+  --side-bg-color: #1f1f1f;
+  --text-color: #ffffff;
+  --highlight-color: #00b4d8;
+  --transition-duration: 0.3s;
+}
+
+.blog-container {
+  display: flex;
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* 
+   When sidebar is open, 
+   we push the content panel to the right by the sidebar's width 
+*/
+.blog-container.sidebar-open .content-panel {
+  margin-left: 200px; /* match sidebar width */
+}
+
+/* Sidebar (hidden by default, slides in when open) */
+.side-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
+  background-color: var(--side-bg-color);
+  transform: translateX(-100%); /* hidden off-screen */
+  transition: transform var(--transition-duration);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 20px 10px;
+  box-sizing: border-box;
+}
+
+/* Slide the sidebar in when .sidebar-open is active */
+.blog-container.sidebar-open .side-panel {
+  transform: translateX(0);
+}
+
+/* Circular toggle button when sidebar is closed */
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+}
+
+/* Hide the toggle button if the sidebar is open */
+.blog-container.sidebar-open .sidebar-toggle {
+  display: none;
+}
+
+.toggle-area-open {
+  margin: 5px;
+  position: relative;
+  border-right: 2px solid #333;
+  padding-right: 10px;
+  transition: border var(--transition-duration);
+}
+
+.toggle-area-closed {
+  margin-left: 200px;
+  position: relative;
+  border-right: 2px solid #333;
+  padding-right: 10px;
+  transition: border var(--transition-duration);
+}
+
+.toggle-area.sidebar-open {
+  border-right: none;
+  border-left: 2px solid #333;
+  padding-left: 10px;
+  padding-right: 0;
+}
+
+.toggle-button-open {
+  position: absolute;
+  top: 0;
+  color: #333 !important;
+  right: -20px;
+  transform: translate(17%);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: var(--side-bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right var(--transition-duration), left var(--transition-duration), transform var(--transition-duration);
+}
+
+.toggle-button-closed {
+  position: absolute;
+  top: 0;
+  right: -20px;
+  color: #333 !important;
+  transform: translate(-10%);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: var(--side-bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right var(--transition-duration), left var(--transition-duration), transform var(--transition-duration);
+}
+
+/* Adjust button position when sidebar is open */
+.toggle-area.sidebar-open .toggle-button {
+  right: auto;
+  left: -20px;
+  transform: translate(-20%);
+}
+
+/* Close button inside the sidebar */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+/* Collapsible section header */
+.section-header {
+  cursor: pointer;
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  font-weight: bold;
+}
+
+.toggle-indicator {
+  margin-left: 5px;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px;
+}
+
+li {
+  cursor: pointer;
+  padding: 5px 0;
+  transition: color var(--transition-duration);
+}
+
+li.active {
+  color: var(--highlight-color);
+}
+
+/* Main content panel, starts with no margin-left */
+.content-panel {
+  flex: 1;
+  padding: 20px;
+  margin-left: 0;
+  transition: margin-left var(--transition-duration);
+}

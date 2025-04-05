@@ -13,3 +13,4 @@
 - [ ] Add pages for unsolved mystries. Like dark matter/enery, information paradox, etc.
 - [ ] https://www.youtube.com/watch?v=Ub86BRzqndA
 - [ ] How much math is used in computer science like taylor series, fourier transform etc
+- [ ] Write in detailed blog about cancer
