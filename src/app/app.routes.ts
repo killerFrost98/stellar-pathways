@@ -19,6 +19,10 @@ export const routes: Routes = [
     loadComponent: () => import('./blog/immune-system/immune-system.component').then(m => m.ImmuneSystemComponent)
   },
   {
+    path: 'blog',
+    loadComponent: () => import('./blog/blog-component/blog.component').then(m => m.BlogComponent)
+  },
+  {
     path: '**',
     redirectTo: 'solar-system'
   }
