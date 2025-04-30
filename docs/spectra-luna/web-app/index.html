@@ -271,7 +271,20 @@
     window.addEventListener('load', function () {
       let session, inferenceParams, spectralChart;
       let CLASS_NAMES = {};
-      let spectralData = [ /* default 200-band data… */ ];
+      // full 200-band default array here…
+      let spectralData = [3683, 4360, 4503, 4492, 4782, 5188, 5291, 5170, 5190, 4953, 5116, 5012, 4883, 5085, 5126,
+        5138, 5136, 5005, 4971, 4885, 4884, 4929, 4891, 4837, 4845, 4846, 4731, 4844, 4837, 4475, 4674, 4401,
+        4660, 5004, 4852, 4755, 5304, 5735, 5597, 3940, 5654, 5740, 5555, 5461, 5161, 4684, 4935, 5351, 5313,
+        5293, 5285, 5260, 5182, 4309, 4110, 4073, 3624, 2221, 2382, 2645, 2655, 3973, 4413, 4675, 4586, 4604,
+        4538, 4507, 4465, 4421, 4299, 4211, 4153, 3987, 2755, 2914, 1779, 1612, 1914, 1785, 2394, 2993, 3112,
+        3146, 3216, 3164, 3297, 2598, 2694, 2645, 3280, 2926, 3053, 3231, 2952, 3122, 3159, 2956, 2645, 2442,
+        1949, 1643, 1103, 1042, 1078, 1124, 1144, 1301, 1410, 1305, 1426, 1734, 2011, 2198, 2329, 2409, 2434,
+        2451, 2429, 2295, 2316, 2353, 2295, 2292, 2350, 2341, 2275, 2250, 2247, 2201, 2183, 2150, 2088, 2042,
+        1997, 1926, 1863, 1833, 1760, 1647, 1474, 1344, 1160, 1057, 1027, 1041, 1125, 1262, 1360, 1299, 1123,
+        1126, 1268, 1410, 1400, 1303, 1296, 1358, 1437, 1445, 1450, 1449, 1450, 1452, 1442, 1407, 1403, 1406,
+        1388, 1375, 1361, 1385, 1383, 1372, 1351, 1325, 1311, 1303, 1286, 1276, 1271, 1271, 1239, 1245, 1215,
+        1193, 1198, 1163, 1153, 1150, 1152, 1135, 1120, 1128, 1096, 1067, 1087, 1064, 1034, 1014
+      ];
 
       async function loadModel() {
         const out = document.getElementById("output");
@@ -290,7 +303,7 @@
           CLASS_NAMES = inferenceParams.CLASS_NAMES || {};
           out.textContent += "[SUCCESS] Inference parameters loaded.\n";
         } catch (err) {
-          document.getElementById("output").textContent += "[ERROR] " + err + "\n";
+          out.textContent += "[ERROR] " + err + "\n";
         }
       }
 
@@ -343,6 +356,7 @@
           }
         });
       }
+
       document.getElementById("spectralInput").addEventListener("input", function () {
         const vals = this.value.split(",").map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
         if (vals.length) {
@@ -369,8 +383,7 @@
           return;
         }
 
-        let data = spectralData.slice();
-        const pcaOut = applyPCA(data, inferenceParams.pca_mean, inferenceParams.pca_components);
+        const pcaOut = applyPCA(spectralData, inferenceParams.pca_mean, inferenceParams.pca_components);
         const norm = normalize(pcaOut, inferenceParams.band_min, inferenceParams.band_max);
         const tensor = new ort.Tensor("float32", new Float32Array(norm), [1, norm.length]);
 
@@ -389,18 +402,19 @@
           out.textContent += "[INFO] Predictions:\n";
           preds.forEach(p => {
             const name = CLASS_NAMES[p.i] || `Class ${p.i}`;
-            out.textContent += `${name}: ${(p.v*100).toFixed(2)}%\n`;
+            out.textContent += `${name}: ${(p.v * 100).toFixed(2)}%\n`;
           });
-          // Attention handling omitted for brevity…
         } catch (err) {
           out.textContent += "[ERROR] Inference failed: " + err + "\n";
         }
       }
 
-      document.getElementById("runInferenceButton").addEventListener("click", runInference);
+      // **Initializations**
+      createChart();
+      document.getElementById("spectralInput").value = spectralData.join(",");
       loadModel();
       loadParams();
-      createChart();
+      document.getElementById("runInferenceButton").addEventListener("click", runInference);
     });
 
   </script>
@@ -412,9 +426,8 @@
     const freqRanges = ["0.3–3 GHz", "1–2 GHz", "2–4 GHz", "4–8 GHz", "8–12 GHz", "12–18 GHz", "18–26.5 GHz",
       "26.5–40 GHz", "40–75 GHz"
     ];
-    const bandTooltips = [ /* … */ ];
 
-    // UI
+    // UI Elements
     const weatherEl = document.getElementById("weatherInput"),
       weatherVal = document.getElementById("weatherValue"),
       slidersContainer = document.getElementById("slidersContainer");
@@ -425,15 +438,12 @@
     }
 
     function updateSliderColor(s) {
+      const pct = s.valueAsNumber;
       s.style.background =
-        `linear-gradient(to right, ${getColor(s.valueAsNumber)} 0%, ${getColor(s.valueAsNumber)} ${s.valueAsNumber}%, var(--border) ${s.valueAsNumber}%, var(--border) 100%)`;
+        `linear-gradient(to right, ${getColor(pct)} 0%, ${getColor(pct)} ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
     }
 
-    weatherEl.addEventListener("input", () => {
-      weatherVal.textContent = weatherEl.value;
-      updateSliderColor(weatherEl);
-    });
-
+    // Build sliders
     bands.forEach((b, i) => {
       const row = document.createElement("div");
       row.className = "slider-row";
@@ -452,19 +462,27 @@
       bandSliders.push(slider);
     });
 
-    // Randomize initial values
-    (() => {
-      weatherEl.value = 0;
-      weatherVal.textContent = 0;
+    // Randomize & initialize
+    function randomizeInputs() {
+      const w = Math.floor(Math.random() * 101);
+      weatherEl.value = w;
+      weatherVal.textContent = w;
       updateSliderColor(weatherEl);
       bandSliders.forEach((s, i) => {
-        s.value = 0;
-        document.getElementById(`bandVal${i}`).textContent = 0;
+        const v = Math.floor(Math.random() * 101);
+        s.value = v;
+        document.getElementById(`bandVal${i}`).textContent = v;
         updateSliderColor(s);
       });
-    })();
+    }
+    randomizeInputs();
 
-    // Model
+    weatherEl.addEventListener("input", () => {
+      weatherVal.textContent = weatherEl.value;
+      updateSliderColor(weatherEl);
+    });
+
+    // ONNX model
     let ortSession;
     async function loadModel() {
       try {
@@ -475,16 +493,15 @@
       }
     }
 
-    // Predict
     async function predict() {
       if (!ortSession) return;
       const weather = +weatherEl.value;
       const interference = bandSliders.map(s => +s.value);
-      const inputTensor = new ort.Tensor("float32", new Float32Array([weather, ...interference]), [1, 10]);
-      const results = await ortSession.run({
-        input: inputTensor
+      const tensor = new ort.Tensor("float32", new Float32Array([weather, ...interference]), [1, 10]);
+      const res = await ortSession.run({
+        input: tensor
       });
-      const logits = Array.from(results.output.data);
+      const logits = Array.from(res.output.data);
       const bestIdx = logits.indexOf(Math.max(...logits));
       const bestBand = bands[bestIdx];
       document.getElementById("outputBand").textContent =
@@ -499,7 +516,7 @@
       else if (w > 20) parts.push("Light rain — Ka/V attenuated.");
       else parts.push("Clear weather — all bands OK.");
       const minI = Math.min(...inter);
-      parts.push(inter[idx] === minI ? "Least congested band." : "Balances congestion & fidelity.");
+      parts.push(inter[idx] === minI ? "Least congested band." : "Balances congestion & resilience.");
       return parts.join(" ");
     }
 
