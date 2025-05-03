@@ -141,6 +141,7 @@
         opacity: 1;
       }
     }
+
   </style>
 </head>
 
@@ -148,7 +149,8 @@
   <div class="cpu-architecture">
     <h1>Understanding CPU Architecture: A Deep Dive</h1>
     <p>This page explains the fundamental concepts of CPU architecture and clarifies common misconceptions about how processors
-      work.</p>
+      work.
+    </p>
 
     <h2>1. How CPUs Work: The Instruction Pipeline</h2>
     <p>At the heart of a CPU's operation is the instruction pipeline. Think of it as an assembly line where instructions are
@@ -157,7 +159,7 @@
       <em>not</em> directly executed by the Arithmetic Logic Units (ALUs). Instead, there's an intermediate step.</p>
 
     <!-- Updated Diagram Image -->
-    <img src="/assets/solar-system/images/apple-micro-arch.jpg" alt="CPU Instruction Pipeline Diagram" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;"
+    <img src="/stellar-pathways/assets/solar-system/images/apple-micro-arch.jpg" alt="CPU Instruction Pipeline Diagram" style="width: 100%; max-width: 600px; display: block; margin: 20px auto;"
     />
 
     <div class="diagram-placeholder">Conceptual Diagram: Instruction → Decoder → Micro-ops → Scheduler → Execution Units (ALUs) → Retirement Buffer</div>
@@ -203,9 +205,9 @@
 
     <p class="note">
       <strong>Note:</strong> Introducing an extra layer of abstraction between the high-level instruction set and the micro-operations—much
-      like Java’s "write once, run anywhere" philosophy—allows different architectures/core types (such as power cores and efficiency cores)
-      to optimize execution in ways tailored to their designs. This approach ensures that even if the same instruction is
-      processed differently, overall performance remains consistent and efficient.
+      like Java’s "write once, run anywhere" philosophy—allows different architectures/core types (such as power cores and
+      efficiency cores) to optimize execution in ways tailored to their designs. This approach ensures that even if the same
+      instruction is processed differently, overall performance remains consistent and efficient.
     </p>
 
     <h2>2. Types of ALUs and Buffer Cache</h2>

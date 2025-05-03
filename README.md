@@ -16,3 +16,4 @@
 - [ ] Write in detailed blog about cancer
 
 ng build --output-path docs --base-href /stellar-pathways/
+update 404.html with index.html
