@@ -27,21 +27,22 @@ export class BlogComponent implements OnInit {
       title: 'Computer Science',
       collapsed: false,
       items: [
-        { title: 'ARM vs x86', file: 'assets/blogs/cpu-micro-architecture.component.html' }
+        { title: 'ARM vs x86', file: 'assets/blogs/cpu-micro-architecture.html' },
+        { title: 'Memory management', file: 'assets/blogs/memory-management.html' }
       ]
     },
     {
       title: 'Biology',
       collapsed: false,
       items: [
-        { title: 'Immune System', file: 'assets/blogs/immune-system.component.html' }
+        { title: 'Immune System', file: 'assets/blogs/immune-system.html' }
       ]
     },
     {
       title: 'Physics',
       collapsed: false,
       items: [
-        { title: 'Noether theorem', file: 'assets/blogs/cpu-micro-architecture.component.html' }
+        { title: 'Noether theorem', file: 'assets/blogs/cpu-micro-architecture.html' }
       ]
     }
   ];
