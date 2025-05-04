@@ -15,6 +15,7 @@
 - [ ] How much math is used in computer science like taylor series, fourier transform etc
 - [ ] Write in detailed blog about cancer
 - [ ] Replication/Distributed Computing blog and Multithreading/Transactions blog
+- [ ] Design patterns based on creation patterns, strategy patterns etc
 - [ ] MCP for solar system
 ng build --output-path docs --base-href /stellar-pathways/
 update 404.html with index.html
