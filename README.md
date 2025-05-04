@@ -14,6 +14,7 @@
 - [ ] https://www.youtube.com/watch?v=Ub86BRzqndA
 - [ ] How much math is used in computer science like taylor series, fourier transform etc
 - [ ] Write in detailed blog about cancer
+- [ ] Replication/Distributed Computing blog and Multithreading/Transactions blog
 
 ng build --output-path docs --base-href /stellar-pathways/
 update 404.html with index.html
