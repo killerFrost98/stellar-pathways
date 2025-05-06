@@ -17,5 +17,8 @@
 - [ ] Replication/Distributed Computing blog and Multithreading/Transactions blog
 - [ ] Design patterns based on creation patterns, strategy patterns etc
 - [ ] MCP for solar system
+- [ ] Blog about godel incompletness theorem
+
 ng build --output-path docs --base-href /stellar-pathways/
 update 404.html with index.html
+replace assets like images with /stellar-pathways/assets

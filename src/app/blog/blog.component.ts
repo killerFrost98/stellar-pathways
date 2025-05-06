@@ -28,7 +28,8 @@ export class BlogComponent implements OnInit {
       collapsed: false,
       items: [
         { title: 'ARM vs x86', file: 'assets/blogs/cpu-micro-architecture.html' },
-        { title: 'Memory management', file: 'assets/blogs/memory-management.html' }
+        { title: 'Memory management', file: 'assets/blogs/memory-management.html' },
+        { title: 'Distributed computing', file: 'assets/blogs/distributed-systems.html' }
       ]
     },
     {
