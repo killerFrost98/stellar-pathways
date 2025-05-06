@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distributed Systems</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      padding: 20px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #ffffff;
+      animation: slideIn 0.8s ease-out;
+    }
+
+    h2 {
+      margin-top: 1.5em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      background: #bb86fc;
+      bottom: 0;
+      left: 0;
+      transition: width 0.5s;
+    }
+
+    h2:hover::after {
+      width: 100%;
+    }
+
+    p,
+    li {
+      font-size: 1rem;
+    }
+
+    code {
+      font-family: monospace;
+      background-color: #333333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #ffb86c;
+    }
+
+    .memory-management {
+      margin: 30px;
+    }
+
+    .highlight {
+      background-color: #333333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #ffb86c;
+    }
+
+    .note {
+      background-color: #1e1e1e;
+      border-left: 4px solid #bb86fc;
+      padding: 10px 15px;
+      margin: 1em 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    ul,
+    ol {
+      margin-bottom: 1em;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      color: #bb86fc;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #ff79c6;
+    }
+
+    * {
+      transition: all 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="memory-management">
+    <h1>Distributed Systems: Core Concepts & Patterns</h1>
+
+    <p>
+      Distributed systems power modern cloud computing, global applications, and high-availability services. Knowing the important
+      topics helps in designing better distributed architectures.
+    </p>
+
+    <h2>Data Management and Consistency</h2>
+    <p>Ensuring consistent and available data across a distributed setup is central to system correctness and user trust. However,
+      in the presence of a network partition—when parts of the system cannot communicate—one must choose between consistency
+      and availability, as defined by the
+      <span class="highlight">CAP theorem</span>. This is because maintaining both simultaneously is impossible: to ensure consistency, a system
+      must reject requests that could lead to divergent states, thus sacrificing availability; to maintain availability,
+      the system must respond to requests even if it cannot guarantee consistency across all nodes.
+    </p>
+    <ul>
+      <li>
+        Replication – Duplicating data across nodes to improve fault tolerance and availability.
+        <ul>
+          <li>
+            <strong>Synchronous replication</strong>: Writes are performed on all nodes before confirming success.</li>
+          <li>
+            <strong>Asynchronous replication</strong>: Write occurs on one node, and synchronization happens later.
+            <ul>
+              <li>
+                <strong>Single leader</strong>: Locks are taken before writes; limited throughput due to a single writer. If the
+                leader fails, stale data may appear on a new leader. Downtime can occur during leader election.</li>
+              <li>
+                <strong>Multi-leader</strong>: Allows multiple write points; can lead to write conflicts, resolved using last write
+                wins or storing sibling versions.</li>
+              <li>
+                <strong>Leaderless</strong>: No single coordinator; uses quorum-based reads/writes (W + R > N) to ensure consistency.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        Consensus Algorithms – These are protocols designed to help a group of distributed nodes agree on a single value or sequence
+        of operations, even in the presence of failures. Consensus is critical in scenarios where maintaining a consistent
+        state across nodes is necessary, such as coordinating updates to a replicated log or electing a leader.
+        <ul>
+          <li>
+            <strong>Raft</strong>: A consensus algorithm designed to be understandable and practical. Raft divides the consensus
+            problem into three key components:
+            <ul>
+              <li>
+                <em>Leader election</em>: One node is elected as the leader, which handles all client requests that modify the
+                state. Other nodes (followers) replicate the leader's log.</li>
+              <li>
+                <em>Log replication</em>: The leader appends client commands to its log and propagates them to followers. Once
+                a majority (quorum) acknowledges the entry, it is considered committed.</li>
+              <li>
+                <em>Safety and consistency</em>: Raft ensures that if a log entry is committed on one node, it will eventually
+                appear in the logs of all other nodes, preserving a consistent order of operations.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>ZooKeeper</strong>: A centralized service for maintaining configuration information, naming, distributed synchronization,
+            and group services. ZooKeeper uses a protocol called **Zab** (ZooKeeper Atomic Broadcast), which is similar in
+            function to consensus algorithms.
+            <ul>
+              <li>
+                <em>Architecture</em>: One leader handles all write operations, and followers serve read requests. Updates require
+                acknowledgment from a quorum to commit.</li>
+              <li>
+                <em>Use case</em>: Frequently used for leader election, distributed locks, and coordination in Hadoop, HBase,
+                Kafka, and other systems.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2>Sharding</h2>
+    <p>Sharding divides a dataset across multiple nodes (shards) to distribute load, improve throughput, and achieve horizontal
+      scalability. An effective shard design ensures that repetitive operations hit a single shard—maximizing cache locality—and
+      prevents hotspots that could overwhelm individual nodes.</p>
+
+
+    <ul>
+      <li>
+        <strong>Access-pattern-aware sharding</strong> – Analyze query patterns and key affinity so that the most frequent operations
+        target a small subset of shards. This reduces cross-shard coordination and leverages in-shard caches for faster responses.</li>
+      <li>
+        <span class="highlight">Consistent hashing</span> – Use a hash ring to assign keys to shards. By hashing both nodes and data keys, consistent
+        hashing minimizes data movement when shards are added or removed and evenly distributes load.</li>
+      <li>
+        <strong>Virtual nodes</strong> – Split each physical shard into multiple logical points on the hash ring. Virtual nodes smooth
+        out uneven key distributions and simplify capacity planning.</li>
+      <li>
+        <span class="highlight">Bloom filters</span> – Maintain a lightweight, probabilistic filter on each shard to quickly test whether a key might
+        exist locally. Bloom filters reduce unnecessary network hops and accelerate read paths.</li>
+      <li>
+        <strong>Global indexes</strong> – Replicate a complete index on each shard so that any shard can serve lookups for secondary
+        attributes without consulting peers. This trades storage overhead for ultra-low-latency reads.</li>
+    </ul>
+
+    <h2>Distributed Transactions</h2>
+    <p>To maintain data integrity across multiple nodes, distributed transactions employ coordination protocols and patterns
+      that ensure atomicity and consistency while balancing performance and availability. Key approaches include:</p>
+
+    <ul>
+      <li>
+        <strong>Two-Phase Commit (2PC)</strong> – A coordinator sends a
+        <em>prepare</em> request to all participants, who vote commit or abort; if all vote commit, the coordinator sends a
+        <em>commit</em> directive. Guarantees atomicity but can block if the coordinator fails.</li>
+      <li>
+        <strong>Three-Phase Commit (3PC)</strong> – Extends 2PC with a
+        <em>pre-commit</em> phase to reduce blocking by introducing a timeout mechanism. Balances consistency and availability
+        but adds complexity and network overhead.</li>
+      <li>
+        <span class="highlight">Saga Pattern</span> – Breaks a global transaction into a series of local transactions, each with a compensating action
+        on failure. Supports long-lived workflows and improves availability at the cost of eventual consistency.</li>
+      <li>
+        <strong>Idempotency and Retries</strong> – Design operations to be repeatable without side effects; use unique transaction
+        IDs to detect duplicates and safely retry in failure scenarios.</li>
+    </ul>
+
+    <h2>Coordination and Synchronization</h2>
+    <p>Distributed components must often act in coordination. Techniques here help prevent race conditions, enable leadership
+      roles, and maintain temporal order in an asynchronous environment.</p>
+    <ul>
+      <li>
+        Distributed Locking – Used to avoid race conditions (e.g., Redis, ZooKeeper).</li>
+      <li>
+        Leader Election – Choosing a "master" node using algorithms like Bully or Raft.</li>
+      <li>
+        Clock Synchronization – Sync time across machines via NTP or Berkeley algorithm.</li>
+    </ul>
+
+    <h2>Fault Tolerance and Recovery</h2>
+    <p>System failures are inevitable. This section introduces techniques to detect, tolerate, and recover from faults—ensuring
+      reliability and uptime.</p>
+    <ul>
+      <li>
+        Failure Detection – Mechanisms like heartbeats, gossip protocols or Netflix Chaos Monkey to detect node failures.</li>
+      <li>
+        <span class="highlight">Checkpointing</span> – Save application state periodically to enable recovery after crash.</li>
+    </ul>
+
+  </div>
+</body>
+
+</html>
