@@ -18,6 +18,8 @@
 - [ ] Design patterns based on creation patterns, strategy patterns etc
 - [ ] MCP for solar system
 - [ ] Blog about godel incompletness theorem
+- [ ] Blog about interfaces, composition and inheritance https://www.youtube.com/watch?v=hxGOiiR9ZKg&t=9s
+- [ ] Blog about different types of rocket: https://www.youtube.com/watch?v=Owji-ukVt9M
 
 ng build --output-path docs --base-href /stellar-pathways/
 update 404.html with index.html

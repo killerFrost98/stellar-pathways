@@ -243,6 +243,41 @@
         IDs to detect duplicates and safely retry in failure scenarios.</li>
     </ul>
 
+    <h2>Database Isolation Levels</h2>
+    <p>
+      In a concurrent environment, multiple transactions may read or write the same data simultaneously.
+      <span class="highlight">Isolation levels</span> let you tune the trade-off between strict consistency and system throughput by defining
+      <em>which anomalies are allowed
+      </em>. The ANSI SQL standard defines four primary levels, each preventing a specific set of problems (listed from weakest
+      to strongest):
+    </p>
+
+    <ul>
+      <li>
+        <strong>Read&nbsp;Uncommitted</strong> – Permits
+        <em>dirty reads</em>&nbsp;– one transaction can see another’s uncommitted changes. Fastest, but least safe; useful only
+        for analytics where occasional noise is acceptable.
+      </li>
+
+      <li>
+        <strong>Read&nbsp;Committed</strong> – Guarantees you never see uncommitted data, but still allows
+        <em>non-repeatable reads</em> and
+        <em>phantoms</em>. Most OLTP databases default here (e.g.&nbsp;PostgreSQL, SQL&nbsp;Server) because it balances correctness
+        and throughput.
+      </li>
+
+      <li>
+        <strong>Repeatable&nbsp;Read / Snapshot</strong> – Every query in a transaction sees a stable snapshot of the data, eliminating
+        non-repeatable reads. Phantoms are still possible unless the engine adds gap locks (as MySQL/InnoDB does) or uses
+        predicate locking.
+      </li>
+
+      <li>
+        <strong>Serializable</strong> – The gold standard: the outcome is as if transactions ran one-at-a-time. Prevents
+        <em>all</em> anomalies, including write skew, at the cost of stricter locking or optimistic conflict detection.
+      </li>
+    </ul>
+
     <h2>Coordination and Synchronization</h2>
     <p>Distributed components must often act in coordination. Techniques here help prevent race conditions, enable leadership
       roles, and maintain temporal order in an asynchronous environment.</p>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Patterns</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      padding: 20px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #ffffff;
+      animation: slideIn 0.8s ease-out;
+    }
+
+    h2 {
+      margin-top: 1.5em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      background: #bb86fc;
+      bottom: 0;
+      left: 0;
+      transition: width 0.5s;
+    }
+
+    h2:hover::after {
+      width: 100%;
+    }
+
+    p,
+    li {
+      font-size: 1rem;
+    }
+
+    code {
+      font-family: monospace;
+      background-color: #333333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #ffb86c;
+    }
+
+    .memory-management {
+      margin: 30px;
+    }
+
+    .highlight {
+      background-color: #333333;
+      padding: 2px 4px;
+      border-radius: 3px;
+      color: #ffb86c;
+    }
+
+    .note {
+      background-color: #1e1e1e;
+      border-left: 4px solid #bb86fc;
+      padding: 10px 15px;
+      margin: 1em 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    ul,
+    ol {
+      margin-bottom: 1em;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      color: #bb86fc;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #ff79c6;
+    }
+
+    * {
+      transition: all 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="memory-management">
+    <h1>Object oriented programming: Solid principles and Design Patterns</h1>
+
+    <p>
+      Software design patterns represent proven solutions to common problems in software architecture and design. They are classified
+      into three categories—Creational, Structural, and Behavioral—each addressing a different aspect of object-oriented
+      design. Below, we explore each pattern, its intent, and when to apply it.
+    </p>
+
+    <h2>Creational Design Patterns</h2>
+    <ul>
+      <li>
+        <strong>Abstract Factory</strong> – Provides an interface for creating families of related or dependent objects without specifying
+        their concrete classes.
+        <em>Use when</em> your system needs to be independent of how its products are created, composed, and represented, and
+        you want to enforce that related products are used together.
+      </li>
+      <li>
+        <strong>Builder</strong> – Separates the construction of a complex object from its representation, allowing the same construction
+        process to create different representations.
+        <em>Use when</em> you need to create different representations or configurations of an object step by step.
+      </li>
+      <li>
+        <strong>Factory Method</strong> – Defines an interface for creating an object but lets subclasses decide which class to instantiate.
+        <em>Use when</em> a class cannot anticipate which class of objects it must create, or when subclasses should specify
+        the objects they create.
+      </li>
+      <li>
+        <strong>Prototype</strong> – Creates new objects by copying an existing object, the prototype.
+        <em>Use when</em>
+        the classes to instantiate are determined at runtime, and you want to avoid building a parallel hierarchy just to instantiate
+        objects.
+      </li>
+      <li>
+        <strong>Singleton</strong> – Ensures a class has only one instance and provides a global point of access to it.
+        <em>Use when</em> exactly one instance of a class is needed, for example, for shared resources like configuration or
+        logging.
+      </li>
+    </ul>
+
+    <h2>Structural Design Patterns</h2>
+    <ul>
+      <li>
+        <strong>Adapter</strong> – Converts the interface of a class into another interface clients expect.
+        <em>Use when</em> you want to reuse existing classes whose interfaces do not match the one you need.
+      </li>
+      <li>
+        <strong>Bridge</strong> – Decouples an abstraction from its implementation, so the two can vary independently.
+        <em>Use when</em> both abstractions and implementations should be extensible by subclassing, and you want to avoid a
+        permanent binding between the two.
+      </li>
+      <li>
+        <strong>Composite</strong> – Composes objects into tree structures to represent part-whole hierarchies.
+        <em>Use when</em> you want clients to treat individual objects and compositions uniformly.
+      </li>
+      <li>
+        <strong>Decorator</strong> – Attaches additional responsibilities to an object dynamically.
+        <em>Use when</em>
+        you want to add behaviors to individual objects without affecting other objects from the same class.
+      </li>
+      <li>
+        <strong>Facade</strong> – Provides a unified interface to a set of interfaces in a subsystem.
+        <em>Use when</em> you want to simplify the usage of a complex subsystem by providing a higher-level interface.
+      </li>
+      <li>
+        <strong>Flyweight</strong> – Uses sharing to support large numbers of fine-grained objects efficiently.
+        <em>Use when</em> many objects must be manipulated and memory savings are critical, such as in graphical applications.
+      </li>
+      <li>
+        <strong>Proxy</strong> – Provides a surrogate or placeholder for another object to control access to it.
+        <em>Use when</em> you need to add a level of indirection to support access control, lazy initialization, logging, or
+        remote access.
+      </li>
+    </ul>
+
+    <h2>Behavioral Design Patterns</h2>
+    <ul>
+      <li>
+        <strong>Chain of Responsibility</strong> – Passes a request along a chain of handlers.
+        <em>Use when</em> multiple objects can handle a request and the handler is determined dynamically.
+      </li>
+      <li>
+        <strong>Command</strong> – Encapsulates a request as an object, thereby letting you parameterize clients with different requests
+        and support undoable operations.
+        <em>Use when</em> you want to decouple the sender of a request from its receiver.
+      </li>
+      <li>
+        <strong>Interpreter</strong> – Defines a representation for grammar and an interpreter to deal with this grammar.
+        <em>Use when</em> you have a language to interpret, and you can represent sentences in that language as abstract syntax
+        trees.
+      </li>
+      <li>
+        <strong>Iterator</strong> – Provides a way to access elements of an aggregate object sequentially without exposing its underlying
+        representation.
+        <em>Use when</em> you need a uniform way to traverse different collections.
+      </li>
+      <li>
+        <strong>Mediator</strong> – Defines an object that encapsulates how a set of objects interact, promoting loose coupling.
+        <em>Use when</em> communications between multiple objects become complex and you want to centralize control.
+      </li>
+      <li>
+        <strong>Memento</strong> – Captures and externalizes an object’s internal state without violating encapsulation, so the object
+        can be restored later.
+        <em>Use when</em> you need to implement undo or rollback operations.
+      </li>
+      <li>
+        <strong>Observer</strong> – Defines a one-to-many dependency so that when one object changes state, all its dependents are
+        notified and updated automatically.
+        <em>Use when</em> changes to one object must be broadcasted to others.
+      </li>
+      <li>
+        <strong>State</strong> – Allows an object to alter its behavior when its internal state changes.
+        <em>Use when</em> an object must change its behavior at runtime depending on its state.
+      </li>
+      <li>
+        <strong>Strategy</strong> – Defines a family of algorithms, encapsulates each one, and makes them interchangeable.
+        <em>Use when</em> you want to select an algorithm’s behavior at runtime.
+      </li>
+      <li>
+        <strong>Template Method</strong> – Defines the skeleton of an algorithm in an operation, deferring some steps to subclasses.
+        <em>Use when</em> you have invariant steps of an algorithm but want to allow subclasses to provide custom behavior for
+        specific steps.
+      </li>
+      <li>
+        <strong>Visitor</strong> – Defines a new operation to a class without changing the class, by using a visitor object.
+        <em>Use when</em> you want to perform operations across a set of heterogeneous objects without polluting their classes.
+      </li>
+    </ul>
+  </div>
+</body>
+
+</html>
